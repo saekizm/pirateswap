@@ -1,60 +1,23 @@
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { Contract } from "@ethersproject/contracts";
-import { shortenAddress, useCall, useEthers, useLookupAddress } from "@usedapp/core";
-import React, { useEffect, useState } from "react";
+import { useCall, useEthers } from "@usedapp/core";
 
-import { Body, Button, Container, Header, Image, Link } from "./components";
-import logo from "./ethereumLogo.png";
+import Navbar from "./components/navbar";
+import Swap from "./components/swap";
+import Liquidity from "./components/liquidity";
+import { Container } from "./components";
 
 import { MAINNET_ID, addresses, abis } from "@uniswap-v2-app/contracts";
 import GET_AGGREGATED_UNISWAP_DATA from "./graphql/subgraph";
 
-function WalletButton() {
-  const [rendered, setRendered] = useState("");
-
-  const { ens } = useLookupAddress();
-  const { account, activateBrowserWallet, deactivate, error } = useEthers();
-
-  useEffect(() => {
-    if (ens) {
-      setRendered(ens);
-    } else if (account) {
-      setRendered(shortenAddress(account));
-    } else {
-      setRendered("");
-    }
-  }, [account, ens, setRendered]);
-
-  useEffect(() => {
-    if (error) {
-      console.error("Error while connecting wallet:", error.message);
-    }
-  }, [error]);
-
-  return (
-    <Button
-      onClick={() => {
-        if (!account) {
-          activateBrowserWallet();
-        } else {
-          deactivate();
-        }
-      }}
-    >
-      {rendered === "" && "Connect Wallet"}
-      {rendered !== "" && rendered}
-    </Button>
-  );
-}
-
 function App() {
-  // Read more about useDapp on https://usedapp.io/
-  const { error: contractCallError, value: reserves } =
-    useCall({
-       contract: new Contract(addresses[MAINNET_ID].pairs["DAI-WETH"], abis.pair),
-       method: "getReserves",
-       args: [],
-    }) ?? {};
+  const { error: contractCallError, value: reserves } = useCall({
+    contract: new Contract(addresses[MAINNET_ID].pairs["DAI-WETH"], abis.pair),
+    method: "getReserves",
+    args: [],
+  }) ?? {};
 
   const { loading, error: subgraphQueryError, data } = useQuery(GET_AGGREGATED_UNISWAP_DATA);
 
@@ -69,22 +32,16 @@ function App() {
   }, [loading, subgraphQueryError, data]);
 
   return (
-    <Container>
-      <Header>
-        <WalletButton />
-      </Header>
-      <Body>
-        <Image src={logo} alt="ethereum-logo" />
-        <p>
-          Edit <code>packages/react-app/src/App.js</code> and save to reload.
-        </p>
-        <Link href="https://reactjs.org">
-          Learn React
-        </Link>
-        <Link href="https://usedapp.io/">Learn useDapp</Link>
-        <Link href="https://uniswap.org/docs/v2/">Learn Uniswap v2</Link>
-      </Body>
-    </Container>
+    <Router>
+      <Container>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<h1>Welcome to MyDApp</h1>} />
+          <Route path="/swap" element={<Swap />} />
+          <Route path="/liquidity" element={<Liquidity />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
