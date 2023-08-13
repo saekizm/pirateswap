@@ -14,7 +14,7 @@ function Navbar() {
           <HomeIcon />
         </IconButton>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Space Pirates Finance
+          Space Pirates Finance!
         </Typography>
 
         {/* Navigation Links */}
