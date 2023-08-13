@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Button, TextField, Dialog, List, ListItem, ListItemText, InputAdornment } from '@mui/material';
-import { useTokenBalance, useEthers, useSendTransaction, useContractFunction } from '@usedapp/core';
+import React, { useState } from 'react';
+import { IconButton, Box, Button, TextField, Container, FormControl, InputAdornment, InputLabel, Dialog, DialogContent, DialogTitle, Typography, Select, MenuItem, Grid } from '@mui/material';
+import ArrowDropDownCircleIcon from '@mui/icons-material/ArrowDropDownCircle';
+import Settings from '@mui/icons-material/Settings';
+import { useEthers, useContractFunction } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
-import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts'; // Adjust the path
+import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts'; 
+import TokenDialog from './tokenDialog';
 
 function Swap() {
   const { account, library } = useEthers();
   const [tokenA, setTokenA] = useState('ETH');
-  const [tokenB, setTokenB] = useState(null);
+  const [tokenB, setTokenB] = useState('');
   const [amountIn, setAmountIn] = useState('');
   const [amountOut, setAmountOut] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedTokenField, setSelectedTokenField] = useState(null); // 'A' or 'B'
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [selectedTokenField, setSelectedTokenField] = useState(null);
 
   const routerContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, library);
   const { state, send } = useContractFunction(routerContract, 'swapExactTokensForTokens', { transactionName: 'Swap' });
@@ -34,7 +39,7 @@ function Swap() {
     setIsDialogOpen(true);
   };
 
-  const selectToken = (token) => {
+  const handleTokenSelect = (token) => {
     if (selectedTokenField === 'A') {
       setTokenA(token);
     } else {
@@ -44,45 +49,71 @@ function Swap() {
   };
 
   return (
-    <div>
-      <TextField
-        label="From"
-        value={amountIn}
-        onChange={(e) => setAmountIn(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" onClick={() => openTokenDialog('A')}>
-              {tokenA || 'Select Token'}
-            </InputAdornment>
-          ),
-        }}
-      />
-      <TextField
-        label="To"
-        value={amountOut}
-        onChange={(e) => setAmountOut(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start" onClick={() => openTokenDialog('B')}>
-              {tokenB || 'Select Token'}
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Button variant="contained" color="primary" onClick={handleSwap}>
-        Swap
-      </Button>
+    <Container maxWidth="sm" style={{ marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5' }}>
+      <Grid container spacing={3}>
+        <Grid item xs={10}>
+          <Typography variant="h6">Swap</Typography>
+        </Grid>
+        <Grid item xs={2}>
+          <IconButton onClick={() => setSettingsOpen(true)}>
+            <Settings />
+          </IconButton>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl variant="outlined" fullWidth>
+            <TextField
+              label="From"
+              value={amountIn}
+              onChange={(e) => setAmountIn(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                     <Box display="flex" alignItems="center">
+                      <Button variant="outlined" size="small" style={{ marginRight: '10px' }} onClick={() => {/* logic to set max amount */}}>Max</Button>
+                      <IconButton onClick={() => openTokenDialog('A')}>
+                        <ArrowDropDownCircleIcon />
+                      </IconButton>
+                    </Box>
+                    </InputAdornment>
+                ),
+              }}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl variant="outlined" fullWidth>
+            <TextField
+              label="To"
+              value={amountOut}
+              onChange={(e) => setAmountOut(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => openTokenDialog('B')}>
+                      <ArrowDropDownCircleIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <Button variant="contained" color="primary" onClick={handleSwap}>
+            Swap
+          </Button>
+        </Grid>
+      </Grid>
 
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-        <List>
-          {Object.keys(addresses[MAINNET_ID].tokens).map((token) => (
-            <ListItem button key={token} onClick={() => selectToken(token)}>
-              <ListItemText primary={token} />
-            </ListItem>
-          ))}
-        </List>
+      <TokenDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} onSelect={handleTokenSelect} />
+
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
+        <DialogTitle>Advanced Settings</DialogTitle>
+        <DialogContent>
+          {/* Add your advanced settings components here */}
+        </DialogContent>
       </Dialog>
-    </div>
+    </Container>
   );
 }
 

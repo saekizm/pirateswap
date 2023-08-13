@@ -11,7 +11,7 @@ const Liquidity = () => {
     };
 
     return (
-        <Container maxWidth="sm">
+        <Container maxWidth="sm" style={{ marginTop : '50px'}}>
             <FormControl variant="outlined" fullWidth margin="normal">
                 <InputLabel id="tokenA-select-label">Token A</InputLabel>
                 <Select
