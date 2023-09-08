@@ -2,8 +2,9 @@ import styled from "styled-components";
 
 export const Body = styled.div`
   align-items: center;
-  color: white;
   display: flex;
+  background-size: cover;
+  background-repeat: no-repeat;
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   justify-content: center;
@@ -24,7 +25,6 @@ export const Button = styled.button`
 `;
 
 export const Container = styled.div`
-  background-color: #282c34;
   display: flex;
   flex-direction: column;
   height: calc(100vh);

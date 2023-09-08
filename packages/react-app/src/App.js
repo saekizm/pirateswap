@@ -36,7 +36,6 @@ function App() {
       <Container>
         <Navbar />
         <Routes>
-          <Route path="/" element={<h1>Welcome to MyDApp</h1>} />
           <Route path="/swap" element={<Swap />} />
           <Route path="/liquidity" element={<Liquidity />} />
         </Routes>
