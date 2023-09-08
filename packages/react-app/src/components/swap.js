@@ -49,7 +49,7 @@ function Swap() {
   };
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5' }}>
+    <Container maxWidth="sm" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5' }}>
       <Grid container spacing={3}>
         <Grid item xs={10}>
           <Typography variant="h6">Swap</Typography>

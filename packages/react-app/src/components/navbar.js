@@ -27,9 +27,10 @@ function Navbar() {
         <Link href="/swap" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
           Swap
         </Link>
-        <Link href="/liquidity" color="inherit" underline="none" sx={{ marginLeft: 2 }}>
+        <Link href="/liquidity" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
           Liquidity
         </Link>
+        
         
         {/* Wallet Connection */}
         {account ? (
