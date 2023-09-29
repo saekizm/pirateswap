@@ -6,6 +6,8 @@ import { useEthers, useContractFunction } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts'; 
 import TokenDialog from './tokenDialog';
+import { SettingModal } from './settingsModal';
+
 
 function Swap() {
   const { account, library } = useEthers();
@@ -107,12 +109,8 @@ function Swap() {
 
       <TokenDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} onSelect={handleTokenSelect} />
 
-      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
-        <DialogTitle>Advanced Settings</DialogTitle>
-        <DialogContent>
-          {/* Add your advanced settings components here */}
-        </DialogContent>
-      </Dialog>
+      <SettingModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
     </Container>
   );
 }
