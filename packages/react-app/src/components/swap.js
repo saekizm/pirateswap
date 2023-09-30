@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
-import { IconButton, Box, Button, TextField, Container, FormControl, InputAdornment, InputLabel, Dialog, DialogContent, DialogTitle, Typography, Select, MenuItem, Grid } from '@mui/material';
+import {
+  IconButton,
+  Box,
+  Button,
+  TextField,
+  Container,
+  FormControl,
+  InputAdornment,
+  Grid,
+  Typography,
+} from '@mui/material';
 import ArrowDropDownCircleIcon from '@mui/icons-material/ArrowDropDownCircle';
 import Settings from '@mui/icons-material/Settings';
-import { useEthers, useContractFunction } from '@usedapp/core';
+import { useEthers, useContractFunction, useTokenBalance } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
-import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts'; 
+import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts';
 import TokenDialog from './tokenDialog';
 import { SettingModal } from './settingsModal';
-
+import { utils } from 'ethers';
 
 function Swap() {
   const { account, library } = useEthers();
@@ -17,11 +27,25 @@ function Swap() {
   const [amountOut, setAmountOut] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
   const [selectedTokenField, setSelectedTokenField] = useState(null);
+
+  const tokenABalance = useTokenBalance(addresses[MAINNET_ID].tokens[tokenA], account);
 
   const routerContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, library);
   const { state, send } = useContractFunction(routerContract, 'swapExactTokensForTokens', { transactionName: 'Swap' });
+
+  const handlePercentageClick = (percentage) => {
+    if (tokenABalance) {
+      const newAmount = tokenABalance.mul(percentage).div(100);
+      setAmountIn(utils.formatUnits(newAmount, 18));
+    }
+  };
+
+  const handleMaxClick = () => {
+    if (tokenABalance) {
+      setAmountIn(utils.formatUnits(tokenABalance, 18));
+    }
+  };
 
   const handleSwap = () => {
     if (tokenA && tokenB && amountIn && amountOut) {
@@ -51,7 +75,19 @@ function Swap() {
   };
 
   return (
-    <Container maxWidth="sm" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5' }}>
+    <Container
+      maxWidth="sm"
+      sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        mt: 2,
+        p: 2,
+        borderRadius: 2,
+        bgcolor: 'background.paper',
+      }}
+    >
       <Grid container spacing={3}>
         <Grid item xs={10}>
           <Typography variant="h6">Swap</Typography>
@@ -70,13 +106,44 @@ function Swap() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                     <Box display="flex" alignItems="center">
-                      <Button variant="outlined" size="small" style={{ marginRight: '10px' }} onClick={() => {/* logic to set max amount */}}>Max</Button>
+                    <Box display="flex" alignItems="center">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mr: 1 }}
+                        onClick={() => handlePercentageClick(100)}
+                      >
+                        Max
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mr: 1 }}
+                        onClick={() => handlePercentageClick(25)}
+                      >
+                        25%
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mr: 1 }}
+                        onClick={() => handlePercentageClick(50)}
+                      >
+                        50%
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ mr: 1 }}
+                        onClick={() => handlePercentageClick(75)}
+                      >
+                        75%
+                      </Button>
                       <IconButton onClick={() => openTokenDialog('A')}>
                         <ArrowDropDownCircleIcon />
                       </IconButton>
                     </Box>
-                    </InputAdornment>
+                  </InputAdornment>
                 ),
               }}
             />
