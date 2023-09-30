@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { TOKENS } from '../tokens';
+import TokenDialog from './tokenDialog';
 import {
     Button,
     Grid,
@@ -13,6 +15,7 @@ import {
     List,
     ListItem,
     ListItemText,
+    InputAdornment
 } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
@@ -29,20 +32,21 @@ const Liquidity = () => {
     };
 
     const handleOpenDialog = (field) => {
-        setTokenField(field);
+        setTokenField(field);  // 'A' or 'B'
         setOpenDialog(true);
     };
 
     const handleCloseDialog = (token) => {
         if (tokenField === 'A') {
-            setTokenA(token);
+            setTokenA(token.symbol);  // Update to use the symbol property of the selected token
         } else {
-            setTokenB(token);
+            setTokenB(token.symbol);  // Update to use the symbol property of the selected token
         }
         setOpenDialog(false);
     };
 
-    const TokenInput = ({ token, setToken, amount, setAmount, label }) => (
+
+    const TokenInput = ({ token, setToken, amount, setAmount, label, field }) => (
         <FormControl variant="outlined" fullWidth>
             <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Button onClick={() => setAmount('max')}>Max</Button>
@@ -52,26 +56,23 @@ const Liquidity = () => {
                     onChange={(e) => setAmount(e.target.value)}
                     variant="outlined"
                     style={{ flex: 1 }}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Box display="flex" alignItems="center">
+                                    <Typography variant="body1">{token}</Typography>
+                                    <IconButton onClick={() => handleOpenDialog(field)}>  {/* pass field prop here */}
+                                        <ArrowDropDownIcon />
+                                    </IconButton>
+                                </Box>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
-                <IconButton onClick={() => handleOpenDialog(label)}>
-                    <ArrowDropDownIcon />
-                </IconButton>
             </Box>
         </FormControl>
     );
 
-    const TokenDialog = () => (
-        <Dialog onClose={() => setOpenDialog(false)} open={openDialog}>
-            <DialogTitle>Select a token</DialogTitle>
-            <List>
-                {['ETH', 'USDT', 'DAI'].map((token) => (
-                    <ListItem button onClick={() => handleCloseDialog(token)} key={token}>
-                        <ListItemText primary={token} />
-                    </ListItem>
-                ))}
-            </List>
-        </Dialog>
-    );
 
     return (
         <Container maxWidth="sm" style={{ marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
@@ -86,6 +87,7 @@ const Liquidity = () => {
                         amount={amountA}
                         setAmount={setAmountA}
                         label="Token A Amount"
+                        field="A"
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -95,6 +97,7 @@ const Liquidity = () => {
                         amount={amountB}
                         setAmount={setAmountB}
                         label="Token B Amount"
+                        field="B"
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -103,7 +106,11 @@ const Liquidity = () => {
                     </Button>
                 </Grid>
             </Grid>
-            <TokenDialog />
+            <TokenDialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                onSelect={handleCloseDialog}
+            />
         </Container>
     );
 }
