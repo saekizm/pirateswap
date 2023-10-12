@@ -13,17 +13,28 @@ import { MAINNET_ID, addresses, abis } from "@uniswap-v2-app/contracts";
 import GET_AGGREGATED_UNISWAP_DATA from "./graphql/subgraph";
 
 function App() {
-  const { error: contractCallError, value: reserves } = useCall({
-    contract: new Contract(addresses[MAINNET_ID].pairs["DAI-WETH"], abis.pair),
-    method: "getReserves",
-    args: [],
-  }) ?? {};
+  const { error: contractCallError, value: reserves } =
+    useCall({
+      contract: new Contract(
+        addresses[MAINNET_ID].pairs["WBTC-WETH"],
+        abis.pair
+      ),
+      method: "getReserves",
+      args: [],
+    }) ?? {};
 
-  const { loading, error: subgraphQueryError, data } = useQuery(GET_AGGREGATED_UNISWAP_DATA);
+  const {
+    loading,
+    error: subgraphQueryError,
+    data,
+  } = useQuery(GET_AGGREGATED_UNISWAP_DATA);
 
   useEffect(() => {
     if (subgraphQueryError) {
-      console.error("Error while querying subgraph:", subgraphQueryError.message);
+      console.error(
+        "Error while querying subgraph:",
+        subgraphQueryError.message
+      );
       return;
     }
     if (!loading && data && data.uniswapFactories) {
