@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   IconButton,
   Box,
@@ -9,30 +9,41 @@ import {
   InputAdornment,
   Grid,
   Typography,
-} from '@mui/material';
-import ArrowDropDownCircleIcon from '@mui/icons-material/ArrowDropDownCircle';
-import Settings from '@mui/icons-material/Settings';
-import { useEthers, useContractFunction, useTokenBalance } from '@usedapp/core';
-import { Contract } from '@ethersproject/contracts';
-import { MAINNET_ID, addresses, abis } from 'contracts';
-import TokenDialog from './tokenDialog';
-import { SettingModal } from './settingsModal';
-import { utils } from 'ethers';
+} from "@mui/material";
+import ArrowDropDownCircleIcon from "@mui/icons-material/ArrowDropDownCircle";
+import Settings from "@mui/icons-material/Settings";
+import { useEthers, useContractFunction, useTokenBalance } from "@usedapp/core";
+import { Contract } from "@ethersproject/contracts";
+import { MAINNET_ID, addresses, abis } from "./contracts";
+import TokenDialog from "./tokenDialog";
+import { SettingModal } from "./settingsModal";
+import { utils } from "ethers";
 
 function Swap() {
   const { account, library } = useEthers();
-  const [tokenA, setTokenA] = useState('ETH');
-  const [tokenB, setTokenB] = useState('');
-  const [amountIn, setAmountIn] = useState('');
-  const [amountOut, setAmountOut] = useState('');
+  const [tokenA, setTokenA] = useState("ETH");
+  const [tokenB, setTokenB] = useState("");
+  const [amountIn, setAmountIn] = useState("");
+  const [amountOut, setAmountOut] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedTokenField, setSelectedTokenField] = useState(null);
 
-  const tokenABalance = useTokenBalance(addresses[MAINNET_ID].tokens[tokenA], account);
+  const tokenABalance = useTokenBalance(
+    addresses[MAINNET_ID].tokens[tokenA],
+    account
+  );
 
-  const routerContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, library);
-  const { state, send } = useContractFunction(routerContract, 'swapExactTokensForTokens', { transactionName: 'Swap' });
+  const routerContract = new Contract(
+    addresses[MAINNET_ID].router02,
+    abis.router02,
+    library
+  );
+  const { state, send } = useContractFunction(
+    routerContract,
+    "swapExactTokensForTokens",
+    { transactionName: "Swap" }
+  );
 
   const handlePercentageClick = (percentage) => {
     if (tokenABalance) {
@@ -52,7 +63,10 @@ function Swap() {
       const args = [
         amountIn,
         amountOut,
-        [addresses[MAINNET_ID].tokens[tokenA], addresses[MAINNET_ID].tokens[tokenB]],
+        [
+          addresses[MAINNET_ID].tokens[tokenA],
+          addresses[MAINNET_ID].tokens[tokenB],
+        ],
         account,
         Math.floor(Date.now() / 1000) + 60 * 20,
       ];
@@ -66,7 +80,7 @@ function Swap() {
   };
 
   const handleTokenSelect = (token) => {
-    if (selectedTokenField === 'A') {
+    if (selectedTokenField === "A") {
       setTokenA(token);
     } else {
       setTokenB(token);
@@ -78,14 +92,14 @@ function Swap() {
     <Container
       maxWidth="sm"
       sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
         mt: 2,
         p: 2,
         borderRadius: 2,
-        bgcolor: 'background.paper',
+        bgcolor: "background.paper",
       }}
     >
       <Grid container spacing={3}>
@@ -139,7 +153,7 @@ function Swap() {
                       >
                         75%
                       </Button>
-                      <IconButton onClick={() => openTokenDialog('A')}>
+                      <IconButton onClick={() => openTokenDialog("A")}>
                         <ArrowDropDownCircleIcon />
                       </IconButton>
                     </Box>
@@ -158,7 +172,7 @@ function Swap() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => openTokenDialog('B')}>
+                    <IconButton onClick={() => openTokenDialog("B")}>
                       <ArrowDropDownCircleIcon />
                     </IconButton>
                   </InputAdornment>
@@ -174,10 +188,16 @@ function Swap() {
         </Grid>
       </Grid>
 
-      <TokenDialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} onSelect={handleTokenSelect} />
+      <TokenDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSelect={handleTokenSelect}
+      />
 
-      <SettingModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-
+      <SettingModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </Container>
   );
 }
