@@ -1,3 +1,6 @@
+features:
+  - fullTextSearch
+  - ipfsOnEthereumContracts
 specVersion: 0.0.5
 description: Track Pairs and Tokens on SpacePiratesFinance (v2) protocol
 repository: https://github.com/saekizm/pirateswap
@@ -6,7 +9,7 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Factory
-    network: cronostestnet_25-1
+    network: cronosmainnet_25-1
     source:
       address: "0x064C52fBc00A8C00905ea8D75d88Bf1FF3a02149"
       abi: Factory
