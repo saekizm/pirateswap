@@ -9,11 +9,12 @@ export const RINKEBY_ID = 4;
 export const ROPSTEN_ID = 3;
 
 const commonContracts = {
-  factory: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+  factory: "0x064C52fBc00A8C00905ea8D75d88Bf1FF3a02149",
   router01: "0xf164fC0Ec4E93095b804a4795bBe1e041497b92a",
   router02: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
 };
 
+//  0x41E6b3f62FE86a88b2dca5a77B0ca34D37c7bbb0  // pair
 export default {
   [GOERLI_ID]: {
     pairs: {

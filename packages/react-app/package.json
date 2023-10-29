@@ -1,5 +1,6 @@
 {
   "name": "@uniswap-v2-app/react-app",
+  "license": "MIT",
   "version": "1.0.0",
   "homepage": "./",
   "browserslist": {
@@ -20,6 +21,7 @@
     "@emotion/styled": "^11.11.0",
     "@ethersproject/contracts": "^5.6.0",
     "@ethersproject/providers": "^5.6.0",
+    "@graphprotocol/graph-ts": "^0.31.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.4",
     "@testing-library/dom": "^8.11.3",
@@ -48,6 +50,13 @@
     ]
   },
   "scripts": {
+    "codegen": "graph codegen src/graphql/subgraph.yaml",
+    "gbuild": "graph build src/graphql/subgraph.yaml",
+    "create:testnet-local": "graph create --node http://192.168.1.139:8020 spacepiratesfinance/exchange-spacedabs-pairs",
+    "deploy": "graph deploy --product hosted-service --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ spacepiratesfinance/exchange-spacedabs-pairs subgraph.yaml",
+    "create:mainnet-factory": "graph create --node http://192.168.1.139:8020 pswap/factory",
+    "deploy:mainnet-factory": "graph deploy --node http://192.168.1.139:8020 pswap/factory src/graphql/subgraph.yaml",
+    "deploy:testnet-local": "graph deploy --node http://192.168.1.139:8020 spacepiratesfinance/exchange-spacedabs-pairs subgraph.yaml",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "ipfs": "yarn build && ipfs-deploy build/",

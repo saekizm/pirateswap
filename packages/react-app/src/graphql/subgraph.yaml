@@ -1,6 +1,6 @@
 specVersion: 0.0.5
 description: Track Pairs and Tokens on SpacePiratesFinance (v2) protocol
-repository: https://github.com/interruptRQ-c/spacepirates-subgraph
+repository: https://github.com/saekizm/pirateswap
 schema:
   file: ./schema.graphql
 dataSources:
@@ -8,9 +8,9 @@ dataSources:
     name: Factory
     network: cronostestnet_25-1
     source:
-      address: "0xd6396b42Ffaf004e7bc7901C7Db3495E3E27d952"
+      address: "0x064C52fBc00A8C00905ea8D75d88Bf1FF3a02149"
       abi: Factory
-      startBlock: 10640901
+      startBlock: 10886787
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
