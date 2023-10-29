@@ -1,4 +1,5 @@
 export const TOKENS = [
+  { symbol: "SPHERE", address: "0xc9FDE867a14376829Ab759F4C4871F67e2d3E441" },
   { symbol: "USDC", address: "0xc21223249CA28397B4B6541dfFaEcC539BfF0c59" },
   { symbol: "WETH", address: "0xe44Fd7fCb2b1581822D0c862B68222998a0c299a" },
   { symbol: "WCRO", address: "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23" },

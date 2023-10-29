@@ -9,7 +9,7 @@ import Swap from "./components/swap";
 import Liquidity from "./components/liquidity";
 import { Container } from "./components";
 
-import { MAINNET_ID, addresses, abis } from "@uniswap-v2-app/contracts";
+import { MAINNET_ID, addresses, abis } from "./components/contracts";
 import GET_AGGREGATED_UNISWAP_DATA from "./graphql/subgraph";
 
 function App() {

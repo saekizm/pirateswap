@@ -21,7 +21,7 @@ import { utils } from "ethers";
 
 function Swap() {
   const { account, library } = useEthers();
-  const [tokenA, setTokenA] = useState("ETH");
+  const [tokenA, setTokenA] = useState("SPHERE");
   const [tokenB, setTokenB] = useState("");
   const [amountIn, setAmountIn] = useState("");
   const [amountOut, setAmountOut] = useState("");

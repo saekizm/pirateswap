@@ -6,7 +6,7 @@ import {
   HttpLink,
   InMemoryCache,
 } from "@apollo/client";
-import { DAppProvider, Mainnet } from "@usedapp/core";
+import { Cronos, DAppProvider } from "@usedapp/core";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -17,9 +17,9 @@ import App from "./App";
 // https://infura.io/register
 // const INFURA_PROJECT_ID = "529670718fd74cd2a041466303daecd7";
 const config = {
-  readOnlyChainId: Mainnet.chainId,
+  readOnlyChainId: Cronos.chainId,
   readOnlyUrls: {
-    [Mainnet.chainId]: "https://rpc-us.spherevaults.com",
+    [Cronos.chainId]: "https://rpc-us.spherevaults.com",
   },
 };
 const link = new HttpLink({
