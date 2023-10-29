@@ -14,7 +14,7 @@ import ArrowDropDownCircleIcon from '@mui/icons-material/ArrowDropDownCircle';
 import Settings from '@mui/icons-material/Settings';
 import { useEthers, useContractFunction, useTokenBalance } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
-import { MAINNET_ID, addresses, abis } from '@uniswap-v2-app/contracts';
+import { MAINNET_ID, addresses, abis } from 'contracts';
 import TokenDialog from './tokenDialog';
 import { SettingModal } from './settingsModal';
 import { utils } from 'ethers';
