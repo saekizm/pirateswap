@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useEthers, useTokenBalance, useContractFunction } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits, parseUnits } from '@ethersproject/units';
@@ -6,9 +6,12 @@ import { Button, Grid, Typography, Container} from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants } from 'ethers';
+
+// Include your TokenDialog component
 import TokenDialog from './TokenDialog';
 
-const Swap = () => {
+
+const AddLiquidity = () => {
   const [tokenA, setTokenA] = useState('');
   const [tokenB, setTokenB] = useState('');
   const [amountA, setAmountA] = useState('');
@@ -18,6 +21,7 @@ const Swap = () => {
   const [approvalA, setApprovalA] = useState(false);
   const [approvalB, setApprovalB] = useState(false);
   const { library: provider, account } = useEthers();
+
 
   const tokenContractA = useMemo(() => tokenA ? new Contract(tokenA, abis.erc20.abi, provider.getSigner()) : null, [tokenA, provider]);
   const tokenContractB = useMemo(() => tokenB ? new Contract(tokenB, abis.erc20.abi, provider.getSigner()) : null, [tokenB, provider]);
@@ -43,8 +47,44 @@ const Swap = () => {
     }
   };
 
-   // Dialog handlers
-   const handleOpenDialog = (field) => {
+  // Setup for adding liquidity
+  const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
+  const { send: addLiquidity, state: addLiquidityState } = useContractFunction(uniswapV2RouterContract, 'addLiquidity', {
+    transactionName: 'Add Liquidity',
+  });
+
+  const handleAddLiquidity = async () => {
+    // Implementation of liquidity adding, considering minimum received and deadline values.
+    // Here, you can also add pre-check conditions or set specific values before sending the transaction.
+    if (!tokenContractA.decimals || !tokenContractB.decimals) {
+      console.error("Token decimals not available");
+      return;
+    }
+    else {
+      console.log(decimalsA, decimalsB)
+    }
+
+    // Convert token amounts for transaction
+    const parsedAmountA = parseUnits(amountA, decimalsA);
+    const parsedAmountB = parseUnits(amountB, decimalsB);
+
+    await addLiquidity(
+      tokenA,
+      tokenB,
+      // Sending the actual token amounts requires considering the token's decimal count.
+      // For simplicity, let's assume it's 18 decimals for both tokens.
+      // In production, ensure to handle tokens with different decimal values appropriately.
+      parsedAmountA,
+      parsedAmountB,
+      0,  // Here, you might want to add logic for minimum amount or slippage
+      0,  // Same as above
+      account,
+      Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time
+    );
+  };
+
+  // Dialog handlers
+  const handleOpenDialog = (field) => {
     setTokenField(field);
     setOpenDialog(true);
   };
@@ -60,28 +100,7 @@ const Swap = () => {
     }
   };
 
-  const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
 
-  const { send: swapTokens, state: swapState } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForTokens', {
-    transactionName: 'Swap Tokens',
-  });
-
-  const handleSwap = async () => {
-    if (!tokenContractA.decimals || !tokenContractB.decimals) {
-      console.error("Token decimals not available");
-      return;
-    }
-
-    const parsedAmountA = parseUnits(amountA, decimalsA);
-
-    await swapTokens(
-      parsedAmountA,
-      0,  // minimum amount of tokens B to accept
-      [tokenA, tokenB],  // path
-      account,
-      Math.floor(Date.now() / 1000) + 60 * 20  // deadline: 20 minutes from the current Unix time
-    );
-  };
 
   const handleTokenSelect = (token) => {
     // handle the token selection
@@ -129,28 +148,11 @@ const Swap = () => {
     fetchDetails();
   }, [tokenContractA, tokenContractB, account, tokenA, tokenB]);
 
-  useEffect(() => {
-    const fetchExpectedAmountB = async () => {
-      if (amountA && decimalsA && tokenA && tokenB && provider) {  // Check if provider is defined
-        const parsedAmountA = parseUnits(amountA, decimalsA);
-        const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, provider.getSigner());
-        try {
-          const amountsOut = await uniswapV2RouterContract.getAmountsOut(parsedAmountA, [tokenA, tokenB]);
-          const expectedAmountB = formatUnits(amountsOut[1], decimalsB);
-          setAmountB(expectedAmountB);
-  
-          // Adding a 2% slippage (98% of expectedAmountB)
-          // const minAmountBWithSlippage = expectedAmountB.mul(98).div(100); 
-          // Uncomment above line if you want to set the minimum amount with slippage
-  
-        } catch (error) {
-          console.error('Error fetching expected amountB:', error);
-        }
-      }
-    };
-  
-    fetchExpectedAmountB();
-  }, [amountA, decimalsA, tokenA, tokenB, provider]);  // Include provider as a dependency
+
+
+
+
+
 
   return (
     <Container
@@ -166,7 +168,7 @@ const Swap = () => {
         bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h6">Swap</Typography>
+      <Typography variant="h6">Add Liquidity</Typography>
       <Grid container spacing={3}>
         {/* Input for token A */}
         <Grid item xs={12}>
@@ -194,7 +196,8 @@ const Swap = () => {
             symbol={symbolB}
           />
         </Grid>
-         <Grid item xs={12}>
+        {/* Add liquidity button */}
+        <Grid item xs={12}>
           <Button
             variant="contained"
             color="primary"
@@ -202,11 +205,13 @@ const Swap = () => {
             onClick={approvalA || approvalB ? () => {
               if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
               if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
-            } : handleSwap}
-            disabled={!account || swapState.status === 'Mining' || (approvalA && approvalB)}
+            } : handleAddLiquidity}
+            disabled={!account || addLiquidityState.status === 'Mining' || (approvalA && approvalB)}
           >
-            {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Swap'}
+            {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Add Liquidity'}
           </Button>
+
+
         </Grid>
       </Grid>
       {/* Token selection dialog */}
@@ -220,4 +225,5 @@ const Swap = () => {
   );
 }
 
-export default Swap;
+export default AddLiquidity;
+

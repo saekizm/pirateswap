@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { TOKENS } from '../tokens';
-import TokenDialog from './tokenDialog';
+import TokenDialog from './TokenDialog';
 import {
     Button,
     Grid,
@@ -10,11 +9,6 @@ import {
     Typography,
     TextField,
     Box,
-    Dialog,
-    DialogTitle,
-    List,
-    ListItem,
-    ListItemText,
     InputAdornment
 } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';

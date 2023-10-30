@@ -6,7 +6,7 @@ import { useCall, useEthers } from "@usedapp/core";
 
 import Navbar from "./components/navbar";
 import Swap from "./components/swap";
-import Liquidity from "./components/liquidity";
+import AddLiquidity from "./components/AddLiquidity";
 import { Container } from "./components";
 
 import { MAINNET_ID, addresses, abis } from "./components/contracts";
@@ -48,7 +48,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/swap" element={<Swap />} />
-          <Route path="/liquidity" element={<Liquidity />} />
+          <Route path="/liquidity" element={<AddLiquidity />} />
         </Routes>
       </Container>
     </Router>
