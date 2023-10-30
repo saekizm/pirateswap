@@ -25,12 +25,7 @@ import React from 'react';
                 <Button variant="outlined" onClick={() => handleMax(field)} size="small">
                   Max
                 </Button>
-                <IconButton
-                  size="small"
-                  onClick={() => handleOpenDialog(field)}
-                >
-                  <ArrowDropDownIcon />
-                </IconButton>
+               <Box marginLeft={1}/>
                 {tokenContract ? (
                   <FormHelperText id={`outlined-helper-text-${field}`} margin="dense">
                     {symbol}
@@ -39,7 +34,13 @@ import React from 'react';
                   <FormHelperText id={`outlined-helper-text-${field}`} margin="dense">
                     Select token
                   </FormHelperText>
-                )}
+                )} 
+                <IconButton
+                  size="small"
+                  onClick={() => handleOpenDialog(field)}
+                >
+                  <ArrowDropDownIcon />
+                </IconButton>
               </Box>
             </InputAdornment>
           }

@@ -150,7 +150,7 @@ const Swap = () => {
     };
   
     fetchExpectedAmountB();
-  }, [amountA, decimalsA, tokenA, tokenB, provider]);  // Include provider as a dependency
+  }, [amountA, decimalsA, decimalsB, tokenA, tokenB, provider]);  // Include provider as a dependency
 
   return (
     <Container

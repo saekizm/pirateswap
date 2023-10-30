@@ -24,6 +24,7 @@
     "@graphprotocol/graph-ts": "^0.31.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.4",
+    "@mui/styles": "^5.14.15",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
