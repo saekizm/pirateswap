@@ -242,7 +242,7 @@ const AddLiquidity = () => {
               if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
               if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
             } : handleAddLiquidity}
-            disabled={!account || addLiquidityState.status === 'Mining' || !(!approvalA && !approvalB)}
+            disabled={!account || addLiquidityState.status === 'Mining' || !(approvalA && approvalB)}
           >
             {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Add Liquidity'}
           </Button>
