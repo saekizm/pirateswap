@@ -30,11 +30,11 @@ const Swap = () => {
   const [symbolB, setSymbolB] = useState(null)
 
   // Handler for maximum balance
-  const handleMax = async (field) => {
+  const handlePercentage = async (field, percentage) => {
     const balance = field === 'A' ? tokenABalance : tokenBBalance;
     const decimals = field === 'A' ? decimalsA : decimalsB;
     if (balance && decimals) {
-      const formattedBalance = formatUnits(balance, decimals);
+      const formattedBalance = formatUnits(balance.mul(percentage).div(100), decimals);
       if (field === 'A') {
         setAmountA(formattedBalance);
       } else {
@@ -42,6 +42,7 @@ const Swap = () => {
       }
     }
   };
+  
 
    // Dialog handlers
    const handleOpenDialog = (field) => {
@@ -175,7 +176,7 @@ const Swap = () => {
             setAmount={setAmountA}
             label="Amount"
             field="A"
-            handleMax={handleMax}
+            handlePercentage={handlePercentage}
             handleOpenDialog={handleOpenDialog}
             tokenContract={tokenContractA}
             symbol={symbolA}
@@ -188,7 +189,7 @@ const Swap = () => {
             setAmount={setAmountB}
             label="Amount"
             field="B"
-            handleMax={handleMax}
+            handlePercentage={handlePercentage}
             handleOpenDialog={handleOpenDialog}
             tokenContract={tokenContractB}
             symbol={symbolB}
