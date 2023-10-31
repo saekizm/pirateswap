@@ -5,7 +5,7 @@ import { formatUnits, parseUnits } from '@ethersproject/units';
 import { Button, Grid, Typography, Container} from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
-import { constants } from 'ethers';
+import { constants, utils } from 'ethers';
 
 // Include your TokenDialog component
 import TokenDialog from './TokenDialog';
@@ -33,6 +33,10 @@ const AddLiquidity = () => {
   const [symbolA, setSymbolA] = useState(null)
   const [symbolB, setSymbolB] = useState(null)
 
+  const [pairContract, setPairContract] = useState(null);
+
+
+
   // Handler for maximum balance
   const handleMax = async (field) => {
     const balance = field === 'A' ? tokenABalance : tokenBBalance;
@@ -46,6 +50,39 @@ const AddLiquidity = () => {
       }
     }
   };
+
+
+  useEffect(() => {
+    const fetchPairContract = async () => {
+      if (tokenA && tokenB && provider) {
+        const factoryContract = new Contract(addresses[MAINNET_ID].factory, abis.factory, provider.getSigner());
+        const pairAddress = await factoryContract.getPair(tokenA, tokenB);
+        if (pairAddress !== utils.getAddress('0x0000000000000000000000000000000000000000')) {
+          const pairContract = new Contract(pairAddress, abis.pair, provider.getSigner());
+          setPairContract(pairContract);
+        }
+      }
+    };
+
+    fetchPairContract();
+  }, [tokenA, tokenB, provider]);
+
+  // New effect to calculate the required amount of token B when the amount of token A changes
+  useEffect(() => {
+    const fetchRequiredAmountB = async () => {
+      if (amountA && decimalsA && pairContract) {
+        const parsedAmountA = parseUnits(amountA, decimalsA);
+        const reserves = await pairContract.getReserves();
+        const reserveA = reserves[0];
+        const reserveB = reserves[1];
+        const requiredAmountB = reserveB.mul(parsedAmountA).div(reserveA);
+        const formattedAmountB = formatUnits(requiredAmountB, decimalsB);
+        setAmountB(formattedAmountB);
+      }
+    };
+
+    fetchRequiredAmountB();
+  }, [amountA, decimalsA, decimalsB, pairContract]);
 
   // Setup for adding liquidity
   const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
@@ -206,7 +243,7 @@ const AddLiquidity = () => {
               if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
               if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
             } : handleAddLiquidity}
-            disabled={!account || addLiquidityState.status === 'Mining' || !(approvalA && approvalB)}
+            disabled={!account || addLiquidityState.status === 'Mining' || !(!approvalA && !approvalB)}
           >
             {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Add Liquidity'}
           </Button>
