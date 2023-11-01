@@ -29,7 +29,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout origin/main
+          git checkout main
           git rebase upstream/main
 
           if git diff --name-only | grep -q .; then
@@ -37,7 +37,7 @@ jobs:
             for file in $(git diff --name-only); do
               git checkout --theirs "$file"
               git add "$file"
-              git theirs --ours ".github/workflows/update-fork.yaml"
+              git checkout --ours ".github/workflows/update-fork.yaml"
               git add ".github/workflows/update-fork.yaml"
               # git checkout --ours "update-fork.yaml"
               # git add "update-fork.yaml"
