@@ -33,4 +33,5 @@ jobs:
       
       - name:  Push Changes to Fork
         run: |
+          git pull        
           git push origin main
