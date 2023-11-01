@@ -33,6 +33,7 @@ jobs:
 
           if [ -n "$(git status --porcelain)"]; then
             git diff
+            git add .github/workflows/update-fork.yaml
             git add update-fork.yaml
             git rebase --continue
           fi
