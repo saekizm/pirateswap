@@ -30,30 +30,31 @@ jobs:
       - name:  Merge Upstream Changes
         run: |
           git checkout main
-          git stash
           git rebase upstream/main
 
           if git diff --name-only | grep -q .; then
             echo "Conflicts detected.  Resolving"
             for file in $(git diff --name-only); do
               git checkout --theirs "$file"
+              git checkout --ours ".github/workflows/update-fork.yaml"
               git add "$file"
             done
             git commit - m "conflict resolved"
           else
             echo "No conflicts detected"
           fi
+          git rebase
           git rebase --continue
 
-          #if [ -n "$(git status --porcelain)"]; then
+          # if [ -n "$(git status --porcelain)"]; then
           #  git diff
           #  git add .github/workflows/update-fork.yaml
           #  git add update-fork.yaml
           #  git rebase --continue
-          #fi
+          # fi
           
-          #git merge --allow-unrelated-histories upstream/main
-          #git merge upstream/main
+          # git merge --allow-unrelated-histories upstream/main
+          # git merge upstream/main
       
       - name:  Push Changes to Fork
         run: |
@@ -66,4 +67,3 @@ jobs:
             # git push origin main;
             exit 0;
           fi
-          git stash apply
