@@ -29,7 +29,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout main
+          git checkout origin/main
           git merge --allow-unrelated-histories upstream/main
           git merge upstream/main
 
