@@ -31,7 +31,7 @@ jobs:
           git checkout origin/main
           git rebase upstream/main
 
-          for file in $(git diff --name-only --diff-filer=U); do
+          for file in $(git diff --name-only --diff-filter=U); do
             if [ "$file" eq "update-fork.yaml" ]; then
               echo "$file";
               git checkout --ours "$file";
