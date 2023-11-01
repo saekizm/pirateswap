@@ -12,7 +12,21 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-  
+        
+      - name : Check for Conflicts and Resolve
+        run: |
+          if git diff --name-only | grep -q .; then
+            echo "Conflicts detected.  Resolving"
+            for file in $(git diff --name-only); do
+              git checkout --theirs "$file"
+              git add "$file"
+            done
+            git commit - m "conflict resolved"
+          else
+            echo "No conflicts detected"
+          fi
+          git rebase --continue
+    
       - name:  Set Up Git
         run: |
           git config --global user.email "northstarstaking@gmail.com"
