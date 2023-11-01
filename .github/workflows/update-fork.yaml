@@ -28,6 +28,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
+          git merge --allow-unrelated-histories https://github.com/saekizm/pirateswap.git
           git merge upstream/main
       
       - name:  Push Changes to Fork
