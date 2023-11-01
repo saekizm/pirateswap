@@ -12,7 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
-    
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}    
 
       - name:  Set Up Git
         run: |
@@ -52,6 +53,4 @@ jobs:
       - name:  Push Changes to Fork
         run: |
             #echo  "Local branch is ahead.  Proceeding with the push.";
-            git config --global user.email "northstarstaking@gmail.com"
-            git config --global user.name "interruptRQ-c"
-            git push origin origin/main;
+            git push -u origin origin/main;
