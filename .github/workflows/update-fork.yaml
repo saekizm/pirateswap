@@ -55,4 +55,4 @@ jobs:
             #echo  "Local branch is ahead.  Proceeding with the push.";
             git config --global user.email "northstarstaking@gmail.com"
             git config --global user.name "interruptRQ-c"
-            git push origin origin/main;
+            git push -u origin origin/main;
