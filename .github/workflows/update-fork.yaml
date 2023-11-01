@@ -32,8 +32,14 @@ jobs:
           git rebase upstream/main
 
           for file in $(git diff --name-only --diff-filer=U); do
-            git checkout --theirs "$file"
-            git add "$file"
+            if [ "$file" eq "update-fork.yaml" ]; then
+              git checkout --ours "$file"
+              git add "$file"
+            else
+              git checkout --theirs "$file"
+              git add "$file"
+            fi
+            
           done
 
           #if [ -n "$(git status --porcelain)"]; then
