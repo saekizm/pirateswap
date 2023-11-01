@@ -37,6 +37,7 @@ jobs:
             for file in $(git diff --name-only); do
               git checkout --theirs "$file"
               git checkout --ours ".github/workflows/update-fork.yaml"
+              git checkout --ours "update-fork.yaml"
               git add "$file"
             done
             git commit - m "conflict resolved"
