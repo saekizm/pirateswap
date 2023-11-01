@@ -29,42 +29,32 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout -b deploy
+          git checkout main
           git rebase upstream/main
 
-          if git diff --name-only | grep -q .; then
-            echo "Conflicts detected.  Resolving"
-            for file in $(git diff --name-only); do
-              git checkout --theirs "$file"
-              git add "$file"
-              git checkout --theirs ".github/workflows/update-fork.yaml"
-              git add ".github/workflows/update-fork.yaml"
-              # git checkout --ours "update-fork.yaml"
-              # git add "update-fork.yaml"
-            done
-            git commit - m "conflict resolved"
-          else
-            echo "No conflicts detected"
-          fi
+            if git diff --name-only | grep -q .; then
+              echo "Conflicts detected.  Resolving"
+              for file in $(git diff --name-only); do
+                git checkout --theirs "$file"
+                git add "$file"
+                git checkout --theirs ".github/workflows/update-fork.yaml"
+                git add ".github/workflows/update-fork.yaml"
+                # git checkout --ours "update-fork.yaml"
+                # git add "update-fork.yaml"
+              done
+              git commit - m "conflict resolved"
+            else
+              echo "No conflicts detected"
+            fi
           git rebase --continue
-
-          # if [ -n "$(git status --porcelain)"]; then
-          #  git diff
-          #  git add .github/workflows/update-fork.yaml
-          #  git add update-fork.yaml
-          #  git rebase --continue
-          # fi
-          
-          # git merge --allow-unrelated-histories upstream/main
-          # git merge upstream/main
       
       - name:  Push Changes to Fork
         run: |
-          # git pull
+          git pull
           if [ $? eq 0 ]; then
             echo "Already up to date";
             exit 0; # Exit without pushing
           else
             echo  "Local branch is ahead.  Proceeding with the push.";
-            git push origin deploy;
+            git push -f origin deploy;
           fi
