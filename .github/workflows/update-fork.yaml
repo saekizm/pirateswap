@@ -30,6 +30,7 @@ jobs:
       - name:  Merge Upstream Changes
         run: |
           git checkout main
+          git stash
           git rebase upstream/main
 
           if git diff --name-only | grep -q .; then
@@ -65,3 +66,4 @@ jobs:
             # git push origin main;
             exit 0;
           fi
+          git stash apply
