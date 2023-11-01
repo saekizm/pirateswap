@@ -28,16 +28,25 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git merge --allow-unrelated-histories upstream/main
-          git merge upstream/main
+          git checkout origin main
+          git rebase upstream/main
+
+          if [ -n "$(git status --porcelain)"]; then
+            git diff
+            git rebase --continue
+          fi
+          
+          #git merge --allow-unrelated-histories upstream/main
+          #git merge upstream/main
       
       - name:  Push Changes to Fork
         run: |
-          git pull
+          # git pull
           if [ $? eq 0 ]; then
             echo "Already up to date";
             exit 0; # Exit without pushing
           else
             echo  "Local branch is ahead.  Proceeding with the push.";
-            git push origin main;
+            # git push origin main;
+            exit 0;
           fi
