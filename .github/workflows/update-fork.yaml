@@ -34,7 +34,7 @@ jobs:
       - name:  Push Changes to Fork
         run: |
           git pull
-          if [ "$(git rev-parse HEAD)" = "$(git rev-parse upstream/main)" ]; then
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
             echo "Up to date. No need to push.";
             exit 0; # Exit without pushiung
           else
