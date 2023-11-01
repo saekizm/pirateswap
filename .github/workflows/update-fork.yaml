@@ -12,7 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
-    
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}    
 
       - name:  Set Up Git
         run: |
