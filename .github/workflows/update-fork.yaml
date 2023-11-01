@@ -39,18 +39,15 @@ jobs:
               for file in $(git diff --name-only); do
                 git checkout --theirs "$file"
                 git add "$file"
-                git checkout --theirs ".github/workflows/update-fork.yaml"
+                git checkout --ours ".github/workflows/update-fork.yaml"
                 git add ".github/workflows/update-fork.yaml"
-                # git checkout --ours "update-fork.yaml"
-                # git add "update-fork.yaml"
               done
               git commit - m "conflict resolved"
             else
               echo "No conflicts detected"
             fi
-          #git rebase --continue
       
       - name:  Push Changes to Fork
         run: |
-            #echo  "Local branch is ahead.  Proceeding with the push.";
-            git push -u origin origin/main;
+            #echo  "Local branch is ahead.  Proceeding with the push."
+            git push -u origin main
