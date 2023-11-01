@@ -28,7 +28,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout origin/main
+          git checkout main
           git rebase upstream/main
 
           for file in $(git diff --name-only --diff-filter=U); do
