@@ -46,7 +46,6 @@ jobs:
           else
             echo "No conflicts detected"
           fi
-          git rebase
           git rebase --continue
 
           # if [ -n "$(git status --porcelain)"]; then
