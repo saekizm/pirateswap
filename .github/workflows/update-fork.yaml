@@ -36,9 +36,11 @@ jobs:
             echo "Conflicts detected.  Resolving"
             for file in $(git diff --name-only); do
               git checkout --theirs "$file"
-              git checkout --ours ".github/workflows/update-fork.yaml"
-              git checkout --ours "update-fork.yaml"
               git add "$file"
+              git checkout --ours ".github/workflows/update-fork.yaml"
+              git add ".github/workflows/update-fork.yaml"
+              git checkout --ours "update-fork.yaml"
+              git add "update-fork.yaml"
             done
             git commit - m "conflict resolved"
           else
