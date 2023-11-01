@@ -28,7 +28,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout origin main
+          git checkout origin/main
           git rebase upstream/main
 
           if [ -n "$(git status --porcelain)"]; then
