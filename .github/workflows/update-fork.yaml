@@ -52,5 +52,5 @@ jobs:
       - name:  Push Changes to Fork
         run: |
             #echo  "Local branch is ahead.  Proceeding with the push.";
-            git push origin/main;
+            git push;
         
