@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useEthers, useTokenBalance, useContractFunction } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits, parseUnits } from '@ethersproject/units';
-import { Button, Grid, Typography, Container} from '@mui/material';
+import { Button, Grid, Typography, Container } from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants } from 'ethers';
@@ -42,10 +42,10 @@ const Swap = () => {
       }
     }
   };
-  
 
-   // Dialog handlers
-   const handleOpenDialog = (field) => {
+
+  // Dialog handlers
+  const handleOpenDialog = (field) => {
     setTokenField(field);
     setOpenDialog(true);
   };
@@ -139,17 +139,17 @@ const Swap = () => {
           const amountsOut = await uniswapV2RouterContract.getAmountsOut(parsedAmountA, [tokenA, tokenB]);
           const expectedAmountB = formatUnits(amountsOut[1], decimalsB);
           setAmountB(expectedAmountB);
-  
+
           // Adding a 2% slippage (98% of expectedAmountB)
           // const minAmountBWithSlippage = expectedAmountB.mul(98).div(100); 
           // Uncomment above line if you want to set the minimum amount with slippage
-  
+
         } catch (error) {
           console.error('Error fetching expected amountB:', error);
         }
       }
     };
-  
+
     fetchExpectedAmountB();
   }, [amountA, decimalsA, decimalsB, tokenA, tokenB, provider]);  // Include provider as a dependency
 
@@ -195,20 +195,33 @@ const Swap = () => {
             symbol={symbolB}
           />
         </Grid>
-         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={approvalA || approvalB ? () => {
-              if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
-              if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
-            } : handleSwap}
-            disabled={!account || swapState.status === 'Mining' || !(approvalA && approvalB)}
-          >
-            {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Swap'}
-          </Button>
+        <Grid item xs={12}>
+          {((approvalA || approvalB) && (
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => {
+                if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
+                if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
+              }}
+              disabled={!account || swapState.status === 'Mining'}
+            >
+              `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}`
+            </Button>
+          )) || (
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleSwap}
+                disabled={!account || swapState.status === 'Mining' || approvalA || approvalB}
+              >
+                Swap
+              </Button>
+            )}
         </Grid>
+
       </Grid>
       {/* Token selection dialog */}
       <TokenDialog

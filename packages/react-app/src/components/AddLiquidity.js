@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useEthers, useTokenBalance, useContractFunction } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits, parseUnits } from '@ethersproject/units';
-import { Button, Grid, Typography, Container} from '@mui/material';
+import { Button, Grid, Typography, Container } from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants, utils } from 'ethers';
@@ -48,7 +48,7 @@ const AddLiquidity = () => {
       }
     }
   };
-  
+
 
 
   useEffect(() => {
@@ -234,21 +234,32 @@ const AddLiquidity = () => {
         </Grid>
         {/* Add liquidity button */}
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={approvalA || approvalB ? () => {
-              if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
-              if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
-            } : handleAddLiquidity}
-            disabled={!account || addLiquidityState.status === 'Mining' || !(approvalA && approvalB)}
-          >
-            {(approvalA || approvalB) ? `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}` : 'Add Liquidity'}
-          </Button>
-
-
+          {(approvalA || approvalB) ? (
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => {
+                if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
+                if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
+              }}
+              disabled={!account || addLiquidityState.status === 'Mining'}
+            >
+              Approve {approvalA ? symbolA : ''} {approvalB ? symbolB : ''}
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleAddLiquidity}
+              disabled={!account || addLiquidityState.status === 'Mining'}
+            >
+              Add Liquidity
+            </Button>
+          )}
         </Grid>
+
       </Grid>
       {/* Token selection dialog */}
       <TokenDialog
