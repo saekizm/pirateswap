@@ -23,7 +23,7 @@ const config = {
   },
 };
 const link = new HttpLink({
-  uri: "https://rpc-us.spherevaults.com/graphbase/subgraphs/name/pswap/factory",
+  uri: "https://rpc-us.spherevaults.com/graphbase/subgraphs/name/pswap/factorypair",
 });
 // This is the official Uniswap v2 subgraph. You can replace it with your own, if you need to.
 // See all subgraphs: https://thegraph.com/explorer/
