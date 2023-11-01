@@ -30,6 +30,7 @@ jobs:
       - name:  Merge Upstream Changes
         run: |
           git checkout main
+          git merge --allow-unrelated-histories upstream/main
           git merge upstream/main
 
             if git diff --name-only | grep -q .; then
