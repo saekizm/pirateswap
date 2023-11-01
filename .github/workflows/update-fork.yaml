@@ -31,12 +31,17 @@ jobs:
           git checkout origin/main
           git rebase upstream/main
 
-          if [ -n "$(git status --porcelain)"]; then
-            git diff
-            git add .github/workflows/update-fork.yaml
-            git add update-fork.yaml
-            git rebase --continue
-          fi
+          for file in $(git diff --name-only --diff-filer=U); do
+            git checkout --theirs "$file"
+            git add "$file"
+          done
+
+          #if [ -n "$(git status --porcelain)"]; then
+          #  git diff
+          #  git add .github/workflows/update-fork.yaml
+          #  git add update-fork.yaml
+          #  git rebase --continue
+          #fi
           
           #git merge --allow-unrelated-histories upstream/main
           #git merge upstream/main
