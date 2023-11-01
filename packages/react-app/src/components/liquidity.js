@@ -1,110 +1,86 @@
-import React, { useState } from 'react';
-import TokenDialog from './TokenDialog';
-import {
-    Button,
-    Grid,
-    IconButton,
-    Container,
-    FormControl,
-    Typography,
-    TextField,
-    Box,
-    InputAdornment
-} from '@mui/material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import React, { useEffect, useState } from 'react';
+import { useEthers } from '@usedapp/core';
+import { Button, Typography, Grid, Container, Divider, useTheme, useMediaQuery } from '@mui/material';
+import TokenInput from './TokenInput';
+import AddLiquidity from './AddLiquidity';
+import RemoveLiquidity from './RemoveLiquidity'; // Make sure to import or create this component
 
 const Liquidity = () => {
-    const [tokenA, setTokenA] = useState('');
-    const [tokenB, setTokenB] = useState('');
-    const [amountA, setAmountA] = useState('');
-    const [amountB, setAmountB] = useState('');
-    const [openDialog, setOpenDialog] = useState(false);
-    const [tokenField, setTokenField] = useState('');
+    const { account } = useEthers();
+    const [liquidityPositions, setLiquidityPositions] = useState([]);
+    const [view, setView] = useState('VIEW'); // Can be 'VIEW', 'ADD', or 'REMOVE'
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const handleAddLiquidity = () => {
-        // Logic to interact with Uniswap contracts for adding liquidity
-    };
+    useEffect(() => {
+        const fetchLiquidityPositions = async () => {
+            // Fetch the user's liquidity positions
+            setLiquidityPositions([]); // Placeholder for now
+        };
 
-    const handleOpenDialog = (field) => {
-        setTokenField(field);  // 'A' or 'B'
-        setOpenDialog(true);
-    };
-
-    const handleCloseDialog = (token) => {
-        if (tokenField === 'A') {
-            setTokenA(token.symbol);  // Update to use the symbol property of the selected token
-        } else {
-            setTokenB(token.symbol);  // Update to use the symbol property of the selected token
+        if (account) {
+            fetchLiquidityPositions();
         }
-        setOpenDialog(false);
-    };
-
-
-    const TokenInput = ({ token, setToken, amount, setAmount, label, field }) => (
-        <FormControl variant="outlined" fullWidth>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Button onClick={() => setAmount('max')}>Max</Button>
-                <TextField
-                    label={label}
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    variant="outlined"
-                    style={{ flex: 1 }}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <Box display="flex" alignItems="center">
-                                    <Typography variant="body1">{token}</Typography>
-                                    <IconButton onClick={() => handleOpenDialog(field)}>  {/* pass field prop here */}
-                                        <ArrowDropDownIcon />
-                                    </IconButton>
-                                </Box>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-            </Box>
-        </FormControl>
-    );
-
+    }, [account]);
 
     return (
-        <Container maxWidth="sm" style={{ marginTop: '50px', padding: '20px', borderRadius: '15px', backgroundColor: '#f5f5f5', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+        <Container maxWidth="sm" sx={{
+            position: "absolute",
+            top: isSmallScreen ? '10%' : "50%",
+            left: "50%",
+            transform: isSmallScreen ? 'translate(-50%, 0%)' : "translate(-50%, -50%)",
+            mt: 2,
+            p: 2,
+            borderRadius: 2,
+            bgcolor: "background.paper",
+        }}>
+            <Typography variant={isSmallScreen ? "h5" : "h6"}>Your Liquidity Positions</Typography>
+            
+            {liquidityPositions.length === 0 && (
+                <Typography variant="body1">No liquidity positions found.</Typography>
+            )}
+            
+            {view === 'VIEW' && liquidityPositions.map((position, index) => (
+                <React.Fragment key={position.id}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <TokenInput
+                                amount={position.amountA}
+                                label={`Token ${position.tokenA}`}
+                                field={position.tokenA}
+                                handleOpenDialog={() => { }} 
+                                symbol={position.tokenA}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TokenInput
+                                amount={position.amountB}
+                                label={`Token ${position.tokenB}`}
+                                field={position.tokenB}
+                                handleOpenDialog={() => { }}
+                                symbol={position.tokenB}
+                            />
+                        </Grid>
+                    </Grid>
+                    {index !== liquidityPositions.length - 1 && <Divider />}
+                </React.Fragment>
+            ))}
+
             <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    <Typography variant="h6">Add Liquidity</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <TokenInput
-                        token={tokenA}
-                        setToken={setTokenA}
-                        amount={amountA}
-                        setAmount={setAmountA}
-                        label="Token A Amount"
-                        field="A"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TokenInput
-                        token={tokenB}
-                        setToken={setTokenB}
-                        amount={amountB}
-                        setAmount={setAmountB}
-                        label="Token B Amount"
-                        field="B"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Button variant="contained" color="primary" fullWidth onClick={handleAddLiquidity}>
+                    {liquidityPositions.length > 0 && (
+                        <Button variant="outlined" fullWidth color="primary" onClick={() => setView('REMOVE')}>
+                            Remove Liquidity
+                        </Button>
+                    )}
+                    <Button variant="outlined" fullWidth color="primary" onClick={() => setView('ADD')}>
                         Add Liquidity
                     </Button>
+
+                    {view === 'ADD' && <AddLiquidity onClose={() => setView('VIEW')} />}
+                    {view === 'REMOVE' && <RemoveLiquidity onClose={() => setView('VIEW')} />} {/* Conditional rendering */}
                 </Grid>
             </Grid>
-            <TokenDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                onSelect={handleCloseDialog}
-            />
         </Container>
     );
 }
