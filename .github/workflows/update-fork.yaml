@@ -33,11 +33,14 @@ jobs:
 
           for file in $(git diff --name-only --diff-filer=U); do
             if [ "$file" eq "update-fork.yaml" ]; then
-              git checkout --ours "$file"
-              git add "$file"
+              echo "$file";
+              git checkout --ours "$file";
+              git add "$file";
             else
-              git checkout --theirs "$file"
-              git add "$file"
+              echo "add theirs";
+              echo "$file";
+              git checkout --theirs "$file";
+              git add "$file";
             fi
             
           done
