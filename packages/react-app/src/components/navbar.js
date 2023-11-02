@@ -46,9 +46,12 @@ function Navbar() {
   return (
     <AppBar position="static" style={{ background: 'black' }}>
       <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="home" href="/">
-          <img src={logoround} alt="Space Pirates Finance Logo" style={{ width: '70px', borderRadius: '50%' }} />
-        </IconButton>
+
+        <Hidden smDown>  {/* Hide on small screens and down */}
+          <IconButton edge="start" color="inherit" aria-label="home" href="/">
+            <img src={logoround} alt="Space Pirates Finance Logo" style={{ width: '70px', borderRadius: '50%' }} />
+          </IconButton>
+        </Hidden>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Space Pirates Finance
         </Typography>
@@ -61,7 +64,7 @@ function Navbar() {
           <Link href="/liquidity" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
             Liquidity
           </Link>
-          
+
           {account ? (
             <>
               <Typography variant="body1" sx={{ marginRight: 2 }}>

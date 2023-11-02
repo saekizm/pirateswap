@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useEthers, useTokenBalance, useContractFunction, useEtherBalance } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits, parseUnits, formatEther } from '@ethersproject/units';
-import { Button, Grid, Typography, Container } from '@mui/material';
+import { Button, Grid, Typography, Container, useTheme, useMediaQuery } from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants } from 'ethers';
@@ -20,6 +20,9 @@ const AddLiquidity = () => {
   const [approvalB, setApprovalB] = useState(false);
   const { library: provider, account } = useEthers();
   const isETH = (tokenAddress) => tokenAddress === '';
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
 
   const tokenContractA = useMemo(() => {
     return !isETH(tokenA) ? new Contract(tokenA, abis.erc20.abi, provider.getSigner()) : null;

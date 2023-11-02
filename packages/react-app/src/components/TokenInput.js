@@ -1,5 +1,16 @@
 import React from 'react';
-import { Button, Box, FormControl, TextField, InputAdornment, IconButton, OutlinedInput, FormHelperText, InputLabel } from '@mui/material';
+import {
+  Button,
+  Box,
+  FormControl,
+  InputAdornment,
+  IconButton,
+  OutlinedInput,
+  FormHelperText,
+  InputLabel,
+  Grid,
+  Typography
+} from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const TokenInput = ({
@@ -19,34 +30,34 @@ const TokenInput = ({
         id={`outlined-adornment-amount-${field}`}
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
-        endAdornment={
-          <InputAdornment position="end">
-            <Box display="flex" alignItems="center">
-              <Button onClick={() => handlePercentage(field, 25)}>25%</Button>
-              <Button onClick={() => handlePercentage(field, 50)}>50%</Button>
-              <Button onClick={() => handlePercentage(field, 75)}>75%</Button>
-              <Button onClick={() => handlePercentage(field, 100)}>Max</Button>
-              <Box marginLeft={1} />
-              {tokenContract ? (
-                <FormHelperText id={`outlined-helper-text-${field}`} margin="dense">
-                  {symbol}
-                </FormHelperText>
-              ) : (
-                <FormHelperText id={`outlined-helper-text-${field}`} margin="dense">
-                  Select token
-                </FormHelperText>
-              )}
-              <IconButton
-                size="small"
-                onClick={() => handleOpenDialog(field)}
-              >
-                <ArrowDropDownIcon />
-              </IconButton>
-            </Box>
-          </InputAdornment>
-        }
         label={label}
       />
+      <Box sx={{ mt: 1 }}>
+        <Grid container spacing={1} alignItems="center">
+          <Grid item xs={12} sm={6}>
+            <Grid container spacing={1}>
+              {[25, 50, 75, 100].map((percentage, index) => (
+                <Grid item xs={3} key={index}>
+                  <Button fullWidth variant="outlined" onClick={() => handlePercentage(field, percentage)}>
+                    {percentage === 100 ? 'Max' : `${percentage}%`}
+                  </Button>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+          <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Typography variant="body2" sx={{ mr: 1 }}>
+              {tokenContract ? symbol : 'Select token'}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => handleOpenDialog(field)}
+            >
+              <ArrowDropDownIcon />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </Box>
     </FormControl>
   );
 };
