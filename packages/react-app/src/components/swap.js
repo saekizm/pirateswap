@@ -263,7 +263,7 @@ const Swap = () => {
                 if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
                 if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
               }}
-              disabled={!account || swapTokensState.status === 'Mining' || approvalA || approvalB}
+              disabled={!account || swapTokensState.status === 'Mining' || !approvalA || !approvalB}
               >
               `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}`
             </Button>
