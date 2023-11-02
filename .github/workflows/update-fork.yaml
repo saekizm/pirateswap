@@ -30,7 +30,7 @@ jobs:
       
       - name:  Merge Upstream Changes
         run: |
-          git checkout main
+          git checkout origin/main
           git merge --allow-unrelated-histories upstream/main
           git merge upstream/main
 
@@ -50,4 +50,4 @@ jobs:
       - name:  Push Changes to Fork
         run: |
             #echo  "Local branch is ahead.  Proceeding with the push."
-            git push upstream main --force
+            git push origin main --force
