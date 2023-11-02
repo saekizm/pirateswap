@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useEthers, useTokenBalance, useContractFunction } from '@usedapp/core';
+import { useEthers, useTokenBalance, useContractFunction, useEtherBalance } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
-import { formatUnits, parseUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits, formatEther } from '@ethersproject/units';
 import { Button, Grid, Typography, Container } from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
-import { constants, utils } from 'ethers';
-
-// Include your TokenDialog component
+import { constants } from 'ethers';
 import TokenDialog from './TokenDialog';
-
+import useBalance from './useBalance';
 
 const AddLiquidity = () => {
   const [tokenA, setTokenA] = useState('');
@@ -21,13 +19,18 @@ const AddLiquidity = () => {
   const [approvalA, setApprovalA] = useState(false);
   const [approvalB, setApprovalB] = useState(false);
   const { library: provider, account } = useEthers();
+  const isETH = (tokenAddress) => tokenAddress === '';
 
+  const tokenContractA = useMemo(() => {
+    return !isETH(tokenA) ? new Contract(tokenA, abis.erc20.abi, provider.getSigner()) : null;
+  }, [tokenA, provider]);
 
-  const tokenContractA = useMemo(() => tokenA ? new Contract(tokenA, abis.erc20.abi, provider.getSigner()) : null, [tokenA, provider]);
-  const tokenContractB = useMemo(() => tokenB ? new Contract(tokenB, abis.erc20.abi, provider.getSigner()) : null, [tokenB, provider]);
+  const tokenContractB = useMemo(() => {
+    return !isETH(tokenB) ? new Contract(tokenB, abis.erc20.abi, provider.getSigner()) : null;
+  }, [tokenB, provider]);
+  const tokenABalance = useBalance(tokenA, account);
+  const tokenBBalance = useBalance(tokenB, account);
 
-  const tokenABalance = useTokenBalance(tokenA, account);
-  const tokenBBalance = useTokenBalance(tokenB, account);
   const [decimalsA, setDecimalsA] = useState(null);
   const [decimalsB, setDecimalsB] = useState(null);
   const [symbolA, setSymbolA] = useState(null)
@@ -35,88 +38,127 @@ const AddLiquidity = () => {
 
   const [pairContract, setPairContract] = useState(null);
 
+  const DEFAULT_DECIMALS = 18;
+
+  const effectiveTokenA = isETH(tokenA) ? addresses[MAINNET_ID].tokens.WCRO : tokenA;
+  const effectiveTokenB = isETH(tokenB) ? addresses[MAINNET_ID].tokens.WCRO : tokenB;
 
   const handlePercentage = async (field, percentage) => {
     const balance = field === 'A' ? tokenABalance : tokenBBalance;
-    const decimals = field === 'A' ? decimalsA : decimalsB;
-    if (balance && decimals) {
+    // Check if the token is ETH to decide which decimals to use
+    const decimals = field === 'A' ? (isETH(tokenA) ? DEFAULT_DECIMALS : decimalsA) : (isETH(tokenB) ? DEFAULT_DECIMALS : decimalsB);
+
+    if (balance && decimals != null) {
       const formattedBalance = formatUnits(balance.mul(percentage).div(100), decimals);
       if (field === 'A') {
         setAmountA(formattedBalance);
+        console.log(formattedBalance)
       } else {
         setAmountB(formattedBalance);
       }
+      console.log(formatUnits(balance, decimals), formattedBalance);
     }
   };
 
 
-
   useEffect(() => {
     const fetchPairContract = async () => {
-      if (tokenA && tokenB && provider) {
+      // Check if the token addresses are set, and the provider is available
+      if (effectiveTokenA && effectiveTokenB && provider) {
+
+
+        // Create a contract instance for the factory
         const factoryContract = new Contract(addresses[MAINNET_ID].factory, abis.factory, provider.getSigner());
-        const pairAddress = await factoryContract.getPair(tokenA, tokenB);
-        if (pairAddress !== utils.getAddress('0x0000000000000000000000000000000000000000')) {
+        // Fetch the pair address from the factory contract
+        const pairAddress = await factoryContract.getPair(effectiveTokenA, effectiveTokenB);
+
+        // Check if the pair address is not the zero address
+        if (pairAddress !== constants.AddressZero) {
+          // Create a contract instance for the pair
           const pairContract = new Contract(pairAddress, abis.pair, provider.getSigner());
+          // Update the state with the pair contract
           setPairContract(pairContract);
         }
       }
     };
 
+    // Call the function to fetch the pair contract
     fetchPairContract();
   }, [tokenA, tokenB, provider]);
 
-  // New effect to calculate the required amount of token B when the amount of token A changes
+
+  // ...
+
   useEffect(() => {
     const fetchRequiredAmountB = async () => {
-      if (amountA && decimalsA && pairContract) {
-        const parsedAmountA = parseUnits(amountA, decimalsA);
+      const decimalsForTokenA = isETH(tokenA) ? DEFAULT_DECIMALS : decimalsA;
+      const decimalsForTokenB = isETH(tokenB) ? DEFAULT_DECIMALS : decimalsB;
+
+      if (amountA && decimalsForTokenA != null && pairContract) {
+        const parsedAmountA = parseUnits(amountA, decimalsForTokenA);
         const reserves = await pairContract.getReserves();
         const reserveA = reserves[0];
         const reserveB = reserves[1];
-        const requiredAmountB = reserveB.mul(parsedAmountA).div(reserveA);
-        const formattedAmountB = formatUnits(requiredAmountB, decimalsB);
-        setAmountB(formattedAmountB);
+        if (!reserveA.isZero()) {
+          const requiredAmountB = reserveB.mul(parsedAmountA).div(reserveA);
+          const formattedAmountB = formatUnits(requiredAmountB, decimalsForTokenB);
+          setAmountB(formattedAmountB);
+        }
       }
     };
 
     fetchRequiredAmountB();
-  }, [amountA, decimalsA, decimalsB, pairContract]);
+  }, [amountA, decimalsA, decimalsB, pairContract, tokenA, tokenB]);
 
   // Setup for adding liquidity
   const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
   const { send: addLiquidity, state: addLiquidityState } = useContractFunction(uniswapV2RouterContract, 'addLiquidity', {
     transactionName: 'Add Liquidity',
   });
+  const { send: addLiquidityETH, state: addLiquidityETHState } = useContractFunction(uniswapV2RouterContract, 'addLiquidityETH', {
+    transactionName: 'Add LiquiditETH',
+  });
 
   const handleAddLiquidity = async () => {
-    // Implementation of liquidity adding, considering minimum received and deadline values.
-    // Here, you can also add pre-check conditions or set specific values before sending the transaction.
-    if (!tokenContractA.decimals || !tokenContractB.decimals) {
-      console.error("Token decimals not available");
-      return;
-    }
-    else {
-      console.log(decimalsA, decimalsB)
-    }
+    // Parse the amounts for tokens A and B
+    const parsedAmountA = parseUnits(amountA, isETH(tokenA) ? 'ether' : decimalsA);
+    const parsedAmountB = parseUnits(amountB, isETH(tokenB) ? 'ether' : decimalsB);
 
-    // Convert token amounts for transaction
-    const parsedAmountA = parseUnits(amountA, decimalsA);
-    const parsedAmountB = parseUnits(amountB, decimalsB);
-
-    await addLiquidity(
-      tokenA,
-      tokenB,
-      // Sending the actual token amounts requires considering the token's decimal count.
-      // For simplicity, let's assume it's 18 decimals for both tokens.
-      // In production, ensure to handle tokens with different decimal values appropriately.
-      parsedAmountA,
-      parsedAmountB,
-      0,  // Here, you might want to add logic for minimum amount or slippage
-      0,  // Same as above
-      account,
-      Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time
-    );
+    if (isETH(tokenA)) {
+      // If token A is ETH, call addLiquidityETH
+      await addLiquidityETH(
+        tokenB, // Token address for token B (ERC-20)
+        parsedAmountB, // Amount of token B
+        0, // Min amount of token B (with slippage)
+        0, // Min amount of ETH (with slippage)
+        account, // User's account address
+        Math.floor(Date.now() / 1000) + 60 * 20, // Deadline
+        { value: parsedAmountA } // Amount of ETH to send with the transaction
+      );
+    } else if (isETH(tokenB)) {
+      // If token B is ETH, call addLiquidityETH
+      await addLiquidityETH(
+        tokenA, // Token address for token A (ERC-20)
+        parsedAmountA, // Amount of token A
+        0, // Min amount of token A (with slippage)
+        0, // Min amount of ETH (with slippage)
+        account, // User's account address
+        Math.floor(Date.now() / 1000) + 60 * 20, // Deadline
+        { value: parsedAmountB } // Amount of ETH to send with the transaction
+      );
+    } else {
+      // If neither token is ETH, call the standard addLiquidity
+      await addLiquidity(
+        tokenA, // Token address for token A
+        tokenB, // Token address for token B
+        parsedAmountA, // Amount of token A
+        parsedAmountB, // Amount of token B
+        0, // Min amount of token A (with slippage)
+        0, // Min amount of token B (with slippage)
+        account, // User's account address
+        Math.floor(Date.now() / 1000) + 60 * 20 // Deadline
+      );
+    }
   };
 
   // Dialog handlers
