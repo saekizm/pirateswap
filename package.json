@@ -23,5 +23,8 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "dependencies": {
+    "@sentry/browser": "^7.77.0"
   }
 }

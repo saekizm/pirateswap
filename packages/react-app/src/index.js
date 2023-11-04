@@ -12,6 +12,18 @@ import ReactDOM from "react-dom";
 
 import App from "./App";
 
+import reportWebVitals from "./reportWebVitals";
+
+import * as Sentry from "@sentry/browser";
+import { BrowserTracing } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: "https://8a2bbfd27556440f93af72f05df58caf@o4504562129174528.ingest.sentry.io/4504562134876160",
+  integrations: [new BrowserTracing()],
+
+  tracesSampleRate: 1.0,
+});
+
 // IMPORTANT, PLEASE READ
 // To avoid disruptions in your app, change this to your own Infura project id.
 // https://infura.io/register
@@ -43,3 +55,5 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
+
+reportWebVitals();
