@@ -10,16 +10,23 @@ import { Cronos, DAppProvider } from "@usedapp/core";
 import React from "react";
 import ReactDOM from "react-dom";
 
+import * as Sentry from "@sentry/react";
 import App from "./App";
-
-import * as Sentry from "@sentry/browser";
-import { BrowserTracing } from "@sentry/tracing";
 
 Sentry.init({
   dsn: "https://8a2bbfd27556440f93af72f05df58caf@o4504562129174528.ingest.sentry.io/4504562134876160",
-  integrations: [new BrowserTracing()],
+  integrations: [new Sentry.BrowserTracing()],
 
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
   tracesSampleRate: 1.0,
+  // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: [
+    "localhost",
+    /^https:\/\/spacepirates\.finance\/api/,
+    /^https:\/\/spherevaults\.com\/graphbase/,
+  ],
 });
 
 // IMPORTANT, PLEASE READ
