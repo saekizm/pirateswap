@@ -25,7 +25,7 @@ Sentry.init({
   tracePropagationTargets: [
     "localhost",
     /^https:\/\/spacepirates\.finance\/api/,
-    /^https:\/\/spherevaults\.com\/graphbase/,
+    /^https:\/\/rpc-us.spherevaults\.com\/graphbase/,
   ],
 });
 
