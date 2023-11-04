@@ -1,53 +1,16 @@
-name: Update Fork
-
+name: sync-fork
 on:
   schedule:
-    - cron:  "*/15 * * * *"
-  workflow_dispatch:
-    
+    - cron: '*/30 0 * * *'
+  workflow_dispatch: { }
 jobs:
-  update:  
+  sync:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write-all
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}    
-
-      - name:  Set Up Git
-        run: |
-          git config --global user.email "northstarstaking@gmail.com"
-          git config --global user.name "interruptRQ-c"
-      
-      - name:  Add Upstream Remote
-        run: |
-          git remote add upstream https://github.com/saekizm/pirateswap.git
-      
-      - name:  Fetch Upstream Changes
-        run: |
-          git fetch upstream
-      
-      - name:  Merge Upstream Changes
-        run: |
-          git checkout origin/main
-          git merge --allow-unrelated-histories upstream/main
-          git merge upstream/main
-
-            if git diff --name-only | grep -q .; then
-              echo "Conflicts detected.  Resolving"
-              for file in $(git diff --name-only); do
-                git checkout --theirs "$file"
-                git add "$file"
-                git checkout --ours ".github/workflows/update-fork.yaml"
-                git add ".github/workflows/update-fork.yaml"
-              done
-              git commit - m "conflict resolved"
-            else
-              echo "No conflicts detected"
-            fi
-      
-      - name:  Push Changes to Fork
-        run: |
-            #echo  "Local branch is ahead.  Proceeding with the push."
-            git push origin origin/main --force
+      - run: gh repo sync $REPOSITORY -b $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH_NAME: ${{ github.ref_name }}
