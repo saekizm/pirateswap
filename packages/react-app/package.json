@@ -25,6 +25,7 @@
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.4",
     "@mui/styles": "^5.14.15",
+    "@sentry/browser": "^7.77.0",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
@@ -53,15 +54,20 @@
   "scripts": {
     "codegen": "graph codegen src/graphql/subgraph.yaml",
     "gbuild": "graph build src/graphql/subgraph.yaml",
-    "create:testnet-local": "graph create --node http://192.168.1.139:8020 spacepiratesfinance/exchange-spacedabs-pairs",
+    "create:testnet-local": "graph create --node graphnode:8020 spacepiratesfinance/exchange-spacedabs-pairs",
     "deploy": "graph deploy --product hosted-service --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ spacepiratesfinance/exchange-spacedabs-pairs subgraph.yaml",
-    "create:mainnet-factory": "graph create --node http://192.168.1.139:8020 pswap/factory",
-    "deploy:mainnet-factory": "graph deploy --node http://192.168.1.139:8020 pswap/factory src/graphql/subgraph.yaml",
-    "deploy:testnet-local": "graph deploy --node http://192.168.1.139:8020 spacepiratesfinance/exchange-spacedabs-pairs subgraph.yaml",
+    "create:mainnet-factory": "graph create --node graphnode:8020 pswap/factory",
+    "deprecate:mainnet-factory": "graph deprecate --name pswap/factory --endpoint graphnode:8020/deprecated",
+    "remove:mainnet-factory": "graph remove --name pswap/factory",
+    "deploy:mainnet-factory": "graph deploy --node graphnode:8020 pswap/factory src/graphql/subgraph.yaml",
+    "deploy:testnet-local": "graph deploy --node graphnode:8020 spacepiratesfinance/exchange-spacedabs-pairs subgraph.yaml",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "ipfs": "yarn build && ipfs-deploy build/",
     "start": "react-scripts start",
     "test": "react-scripts test"
+  },
+  "devDependencies": {
+    "@sentry/browser": "^7.77.0"
   }
 }

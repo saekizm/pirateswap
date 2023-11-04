@@ -12,8 +12,6 @@ import ReactDOM from "react-dom";
 
 import App from "./App";
 
-import reportWebVitals from "./reportWebVitals";
-
 import * as Sentry from "@sentry/browser";
 import { BrowserTracing } from "@sentry/tracing";
 
@@ -55,5 +53,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
-
-reportWebVitals();
