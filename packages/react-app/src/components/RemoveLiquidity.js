@@ -1,61 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { useEthers, useContractFunction } from '@usedapp/core';
+import { Slider, Typography, Grid, Button } from '@mui/material';
+import { useContractFunction, useEthers } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
-import { Button, Typography, Grid, Container } from '@mui/material';
-import { MAINNET_ID, addresses, abis } from "./contracts";
-import TokenInput from "./TokenInput";
+import { parseUnits } from '@ethersproject/units';
+import { BigNumber } from 'ethers';
+import { addresses, abis, MAINNET_ID } from "./contracts";
+import { TOKENS } from '../tokens';
 
-const RemoveLiquidity = () => {
-    const { library: provider, account } = useEthers();
-    const [amount, setAmount] = useState(''); // Amount of LP tokens to remove
 
-    // Create a contract instance of the pair the user wants to remove liquidity from
-    const pairContract = new Contract(addresses[MAINNET_ID].pair, abis.pair, provider.getSigner());
-    
-    // Setup for removing liquidity
-    const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
-    const { send: removeLiquidity, state: removeLiquidityState } = useContractFunction(uniswapV2RouterContract, 'removeLiquidity', {
-        transactionName: 'Remove Liquidity',
+const RemoveLiquidity = ({ pair }) => {
+  const [sliderValue, setSliderValue] = useState(0); // Slider value in percentage
+  const [tokenAmounts, setTokenAmounts] = useState({ tokenA: '0', tokenB: '0' });
+  const { library: provider, account } = useEthers();
+  const lpTokenContract = new Contract(pair.id, abis.pair, provider);
+  const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, provider);
+  const cro = TOKENS.find(token => token.symbol === 'CRO')
+ 
+  const { send: removeLiquidity } = useContractFunction(uniswapV2RouterContract, 'removeLiquidity', {
+    transactionName: 'Remove Liquidity',
+  });
+  const { send: removeLiquidityETH, state: removeLiquidityETHState } = useContractFunction(uniswapV2RouterContract, 'removeLiquidityETH', {
+    transactionName: 'Remove LiquidityETH',
+  });
+
+  
+
+  const updateTokenAmounts = async (percentage) => {
+    // Get the total supply of LP tokens
+    const totalSupply = await lpTokenContract.totalSupply();
+  
+    // Get the reserves for token A and token B
+    const [reserveA, reserveB] = await lpTokenContract.getReserves();
+  
+    // Get the user's balance of LP tokens
+    const userLiquidity = await lpTokenContract.balanceOf(account);
+  
+    // Calculate the user's share of liquidity to remove based on the slider percentage
+    const liquidityToRemove = userLiquidity.mul(percentage).div(100);
+  
+    // Calculate the amount of each token to remove based on the user's share
+    const amountA = reserveA.mul(liquidityToRemove).div(totalSupply);
+    const amountB = reserveB.mul(liquidityToRemove).div(totalSupply);
+  
+    // Update state with the calculated token amounts, formatted as strings
+    setTokenAmounts({
+      tokenA: amountA.toString(),
+      tokenB: amountB.toString()
     });
+  };
+  
+  useEffect(() => {
+    updateTokenAmounts(sliderValue);
+  }, [sliderValue]);
 
-    const handleRemoveLiquidity = async () => {
-        // This method should also consider minAmounts for tokens and other relevant parameters
-        await removeLiquidity(
-            // Parameters here: tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline
-            // You'll need to provide these parameters accurately based on the context and user's selection
-        );
-    };
+  const handleSliderChange = (event, newValue) => {
+    setSliderValue(newValue);
+  };
 
-    return (
-        <Container maxWidth="sm">
-            <Typography variant="h6">Remove Liquidity</Typography>
-            <Grid container spacing={3}>
-                <Grid item xs={12}>
-                    <TokenInput
-                        amount={amount}
-                        setAmount={setAmount}
-                        label="LP Tokens"
-                        field="LP"
-                        // For simplicity, handlePercentage is not included. You may want to modify this based on your requirements.
-                        handleOpenDialog={() => {}}
-                        tokenContract={pairContract}
-                        symbol="LP"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        onClick={handleRemoveLiquidity}
-                        disabled={!account || removeLiquidityState.status === 'Mining'}
-                    >
-                        Remove Liquidity
-                    </Button>
-                </Grid>
-            </Grid>
-        </Container>
-    );
-}
+  const handleRemoveLiquidity = async () => {
+    if (!account) return;
+  
+
+    const deadline = Math.floor(Date.now() / 1000) + 20 * 60; // 20 minutes from now
+  
+    // Retrieve the LP token balance of the user
+    const liquidity = await lpTokenContract.balanceOf(account);
+  
+    // Calculate the LP tokens to remove based on the slider percentage
+    const liquidityToRemove = liquidity.mul(sliderValue).div(100);
+  
+    try {
+      // If one of the tokens in the pair is WETH/ETH, use `removeLiquidityETH`
+      // You would need to check if `pair.token0` or `pair.token1` is WETH/ETH
+      if (pair.token0.id === cro.address || pair.token1.id === cro.address) {
+        const tokenAddress = pair.token0.id === cro.address ? pair.token1.id : pair.token0.id;
+  
+        await removeLiquidityETH(tokenAddress, liquidityToRemove, 0, 0, account, deadline);
+      } else {
+        // If neither of the tokens is WETH/ETH, use `removeLiquidity`
+        await removeLiquidity(pair.token0.id, pair.token1.id, liquidityToRemove, 0, 0, account, deadline);
+      }
+    } catch (error) {
+      // Handle errors, such as rejection by user or transaction failure
+      console.error('Failed to remove liquidity:', error);
+    }
+  };
+  
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography gutterBottom>Remove Liquidity</Typography>
+        <Slider value={sliderValue} onChange={handleSliderChange} aria-labelledby="liquidity-percentage-slider" />
+        <Typography>{`You are removing ${sliderValue}% of your liquidity`}</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography>{`${pair.token0.symbol} Amount: ${tokenAmounts.tokenA}`}</Typography>
+        <Typography>{`${pair.token1.symbol} Amount: ${tokenAmounts.tokenB}`}</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" onClick={handleRemoveLiquidity}>
+          Remove Liquidity
+        </Button>
+      </Grid>
+    </Grid>
+  );
+};
 
 export default RemoveLiquidity;
