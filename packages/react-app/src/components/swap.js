@@ -5,7 +5,7 @@ import { formatUnits, parseUnits } from '@ethersproject/units';
 import { Button, Grid, Typography, Container } from '@mui/material';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
-import { constants } from 'ethers';
+import { constants, BigNumber } from 'ethers';
 import TokenDialog from './TokenDialog';
 import useBalance from './useBalance';
 
@@ -19,49 +19,111 @@ const Swap = () => {
   const [approvalA, setApprovalA] = useState(false);
   const [approvalB, setApprovalB] = useState(false);
   const { library: provider, account } = useEthers();
-  const isETH = (tokenAddress) => tokenAddress === '';
-
-  const tokenContractA = useMemo(() => {
-    return !isETH(tokenA) ? new Contract(tokenA, abis.erc20.abi, provider.getSigner()) : null;
-  }, [tokenA, provider]);
-
-  const tokenContractB = useMemo(() => {
-    return !isETH(tokenB) ? new Contract(tokenB, abis.erc20.abi, provider.getSigner()) : null;
-  }, [tokenB, provider]);
-  const tokenABalance = useBalance(tokenA, account);
-  const tokenBBalance = useBalance(tokenB, account);
-
-  const [decimalsA, setDecimalsA] = useState(null);
-  const [decimalsB, setDecimalsB] = useState(null);
+  const isETH = (symbol) => symbol === 'CRO';
   const [symbolA, setSymbolA] = useState(null)
   const [symbolB, setSymbolB] = useState(null)
-  const etherBalance = useEtherBalance(account);
+  const tokenABalance = useBalance(tokenA, symbolA, account);
+  const tokenBBalance = useBalance(tokenB, symbolB, account);
+  const [decimalsA, setDecimalsA] = useState(null);
+  const [decimalsB, setDecimalsB] = useState(null);
 
-  const DEFAULT_DECIMALS = 18;
+  const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, provider);
 
-  const effectiveTokenA = isETH(tokenA) ? addresses[MAINNET_ID].tokens.WCRO : tokenA;
-  const effectiveTokenB = isETH(tokenB) ? addresses[MAINNET_ID].tokens.WCRO : tokenB;
+  const tokenContractA = useMemo(() => {
+    if (!provider || !tokenA || isETH(symbolA)) return null;
+    return new Contract(tokenA, abis.erc20.abi, provider.getSigner());
+  }, [tokenA, provider, symbolA]);
 
-  // Handler for maximum balance
+  const tokenContractB = useMemo(() => {
+    if (!provider || !tokenB || isETH(symbolB)) return null;
+    return new Contract(tokenB, abis.erc20.abi, provider.getSigner());
+  }, [tokenB, provider, symbolB]);
+
+  const { send: swapExactETHForTokens } = useContractFunction(uniswapV2RouterContract, 'swapExactETHForTokens', {
+    transactionName: 'Swap ETH for Tokens',
+  });
+
+  const { send: swapExactTokensForETH } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETH', {
+    transactionName: 'Swap Tokens for ETH',
+  });
+
+  const { send: swapExactTokensForTokens, state: swapTokensState } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForTokens', {
+    transactionName: 'Swap Tokens for Tokens',
+  });
+
+  
+
+  useEffect(() => {
+    if (tokenContractA && account && amountA) {
+      const checkApprovalA = async () => {
+        const allowance = await tokenContractA.allowance(account, addresses[MAINNET_ID].router02);
+        setApprovalA(allowance.lt(parseUnits(amountA, decimalsA)));
+      };
+  
+      checkApprovalA();
+    }
+  
+    if (tokenContractB && account && amountB) {
+      const checkApprovalB = async () => {
+        const allowance = await tokenContractB.allowance(account, addresses[MAINNET_ID].router02);
+        setApprovalB(allowance.lt(parseUnits(amountB, decimalsB)));
+      };
+  
+      checkApprovalB();
+    }
+  }, [provider, account, tokenA, tokenB, tokenContractA, tokenContractB, amountA, amountB, decimalsA, decimalsB]);
+  
+
+
+  const getAmount = async (value, field) => {
+    // take the value, call get amounts out
+    // return them
+    if (field === 'A' && value) {
+      const amountsOut = await uniswapV2RouterContract.getAmountsOut(parseUnits(value, decimalsA), [tokenA, tokenB]);
+      console.log(amountsOut)
+      return ({ amountA: value, amountB: formatUnits(amountsOut[1], decimalsB) })
+    }
+    else if ( field === 'B' && value) {
+      const parsedAmountB = parseUnits(value, decimalsB);
+      const amountsIn = await uniswapV2RouterContract.getAmountsIn(parsedAmountB, [tokenA, tokenB]);
+      return ({ amountA: formatUnits(amountsIn[0], decimalsA), amountB: value })
+    }
+
+  }
+
   const handlePercentage = async (field, percentage) => {
-    const balance = field === 'A' ? tokenABalance : tokenBBalance;
-    // Check if the token is ETH to decide which decimals to use
-    const decimals = field === 'A' ? (isETH(tokenA) ? DEFAULT_DECIMALS : decimalsA) : (isETH(tokenB) ? DEFAULT_DECIMALS : decimalsB);
+    let balance, decimals;
+    if (field === 'A') {
+      balance = tokenABalance;
+      decimals = decimalsA;
 
-    if (balance && decimals != null) {
-      const formattedBalance = formatUnits(balance.mul(percentage).div(100), decimals);
-      if (field === 'A') {
-        setAmountA(formattedBalance);
-        console.log(formattedBalance)
-      } else {
-        setAmountB(formattedBalance);
-      }
-      console.log(formatUnits(balance, decimals), formattedBalance);
+    } else if (field === 'B') {
+      balance = tokenBBalance;
+      decimals = decimalsB;
+    } else {
+      // Handle invalid field error
+      console.error("Invalid field passed to handlePercentage");
+      return;
+    }
+    console.log(balance, decimals)
+    // Check if the balance is available and a decimal count is set
+    if (balance && decimals) {
+      // Calculate the new amount based on the percentage of the balance
+      // Convert the percentage to BigNumber
+      const percentageBN = BigNumber.from(percentage.toString());
+      // Multiply balance by percentage
+      const amount = balance.mul(percentageBN);
+      // Divide by 100 (as a BigNumber)
+      const hundredBN = BigNumber.from('100');
+      const finalAmount = amount.div(hundredBN);
+      const formattedAmount = formatUnits(finalAmount, decimals);
+      const amounts = await getAmount(formattedAmount, field);
+      // Update the state with the new amount
+      setAmountA(amounts.amountA);
+      setAmountB(amounts.amountB);
     }
   };
 
-
-  // Dialog handlers
   const handleOpenDialog = (field) => {
     setTokenField(field);
     setOpenDialog(true);
@@ -71,39 +133,35 @@ const Swap = () => {
     setOpenDialog(false);
     if (token) {
       if (tokenField === 'A') {
+        setApprovalA(false);
         setTokenA(token.address);
+        setSymbolA(token.symbol);
+        setDecimalsA(token.decimals);
+        setAmountA('');
+        setAmountB('');
+        
       } else {
+        setApprovalB(false);
         setTokenB(token.address);
+        setSymbolB(token.symbol);
+        setDecimalsB(token.decimals);
+        setAmountB('');
+        setAmountA('');
       }
     }
   };
 
-  const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
-
-  const { send: swapExactETHForTokens } = useContractFunction(uniswapV2RouterContract, 'swapExactETHForTokens', {
-    transactionName: 'Swap ETH for Tokens',
-  });
-  
-  const { send: swapExactTokensForETH } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETH', {
-    transactionName: 'Swap Tokens for ETH',
-  });
-  
-  const { send: swapExactTokensForTokens, state: swapTokensState } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForTokens', {
-    transactionName: 'Swap Tokens for Tokens',
-  });
-  
-
   const handleSwap = async () => {
     // Define WCRO address for the network (assuming this is your wrapped ETH equivalent)
     const WCRO = addresses[MAINNET_ID].tokens.WCRO;
-    
+
     // Check if token A or B is ETH and use the WCRO address in the path
     const path = [
-      isETH(tokenA) ? WCRO : tokenA,
-      isETH(tokenB) ? WCRO : tokenB,
+      isETH(symbolA) ? WCRO : tokenA,
+      isETH(symbolB) ? WCRO : tokenB,
     ];
-    
-    if (isETH(tokenA)) {
+
+    if (isETH(symbolA)) {
       // If token A is ETH, use swapExactETHForTokens
       const parsedAmountBMin = parseUnits(amountB, decimalsB); // Minimum amount of token B to accept
       await swapExactETHForTokens(
@@ -113,7 +171,7 @@ const Swap = () => {
         Math.floor(Date.now() / 1000) + 60 * 20,  // Deadline
         { value: parseUnits(amountA, 'ether') }   // Amount of ETH to send
       );
-    } else if (isETH(tokenB)) {
+    } else if (isETH(symbolB)) {
       // If token B is ETH, use swapExactTokensForETH
       const parsedAmountA = parseUnits(amountA, decimalsA); // Amount of token A to swap
       await swapExactTokensForETH(
@@ -135,16 +193,13 @@ const Swap = () => {
       );
     }
   };
-  
-  
-  
 
   const handleTokenSelect = (token) => {
     // handle the token selection
     handleCloseDialog(token); // this function now acts as the onSelect handler
   };
 
-  const handleApprove = async (tokenAddress, tokenContract, setApproval) => {
+  const handleApprove = async (tokenContract, setApproval) => {
     try {
       const transactionResponse = await tokenContract.approve(addresses[MAINNET_ID].router02, constants.MaxUint256);
       // You could add a loading state here
@@ -155,61 +210,6 @@ const Swap = () => {
       // Handle error, possibly setting some state to inform the user
     }
   };
-
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (tokenContractA && tokenContractB && account) {
-        try {
-          const [allowanceA, allowanceB, decimalsA, decimalsB, symbolA, symbolB] = await Promise.all([
-            tokenContractA.allowance(account, addresses[MAINNET_ID].router02),
-            tokenContractB.allowance(account, addresses[MAINNET_ID].router02),
-            tokenContractA.decimals(),
-            tokenContractB.decimals(),
-            tokenContractA.symbol(),
-            tokenContractB.symbol()
-          ]);
-
-          setApprovalA(allowanceA.isZero());
-          setApprovalB(allowanceB.isZero());
-          setDecimalsA(decimalsA);
-          setDecimalsB(decimalsB);
-          setSymbolA(symbolA);
-          setSymbolB(symbolB);
-        } catch (error) {
-          console.error("Error fetching token details", error);
-        }
-      }
-    };
-
-    fetchDetails();
-  }, [tokenContractA, tokenContractB, account, tokenA, tokenB]);
-
-  useEffect(() => {
-    const fetchExpectedAmountB = async () => {
-      const decimalsForTokenA = isETH(tokenA) ? DEFAULT_DECIMALS : decimalsA;
-      const decimalsForTokenB = isETH(tokenB) ? DEFAULT_DECIMALS : decimalsB;
-      console.log("a: ", amountA, decimalsForTokenA, tokenB);
-      if (amountA && decimalsForTokenA) {  // Check if provider is defined
-        const parsedAmountA = parseUnits(amountA, decimalsForTokenA);
-        const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, provider.getSigner());
-        try {
-          const amountsOut = await uniswapV2RouterContract.getAmountsOut(parsedAmountA, [effectiveTokenA, effectiveTokenB]);
-          const expectedAmountB = formatUnits(amountsOut[1], decimalsB);
-          setAmountB(expectedAmountB);
-
-          // Adding a 2% slippage (98% of expectedAmountB)
-          // const minAmountBWithSlippage = expectedAmountB.mul(98).div(100); 
-          // Uncomment above line if you want to set the minimum amount with slippage
-
-        } catch (error) {
-          console.error('Error fetching expected amountB:', error);
-        }
-      }
-    };
-
-    fetchExpectedAmountB();
-  }, [amountA, decimalsA, decimalsB, tokenA, tokenB, provider]);  // Include provider as a dependency
 
   return (
     <Container
@@ -231,12 +231,13 @@ const Swap = () => {
         <Grid item xs={12}>
           <TokenInput
             amount={amountA}
-            setAmount={setAmountA}
+            setAmountA={setAmountA} // Correct prop for setting amountA
+            setAmountB={setAmountB} // Correct prop for setting amountB
             label="Amount"
             field="A"
+            getAmount={getAmount} // Function to get corresponding amounts
             handlePercentage={handlePercentage}
-            handleOpenDialog={handleOpenDialog}
-            tokenContract={tokenContractA}
+            handleOpenDialog={() => handleOpenDialog('A')} // Adjusted to pass field directly
             symbol={symbolA}
           />
         </Grid>
@@ -244,12 +245,13 @@ const Swap = () => {
         <Grid item xs={12}>
           <TokenInput
             amount={amountB}
-            setAmount={setAmountB}
+            setAmountA={setAmountA} // Correct prop for setting amountA
+            setAmountB={setAmountB} // Correct prop for setting amountB
             label="Amount"
             field="B"
+            getAmount={getAmount} // Function to get corresponding amounts
             handlePercentage={handlePercentage}
-            handleOpenDialog={handleOpenDialog}
-            tokenContract={tokenContractB}
+            handleOpenDialog={() => handleOpenDialog('B')} // Adjusted to pass field directly
             symbol={symbolB}
           />
         </Grid>
@@ -260,12 +262,12 @@ const Swap = () => {
               color="primary"
               fullWidth
               onClick={() => {
-                if (approvalA) handleApprove(tokenA, tokenContractA, setApprovalA);
-                if (approvalB) handleApprove(tokenB, tokenContractB, setApprovalB);
+                if (approvalA) handleApprove(tokenContractA, setApprovalA);
+                if (approvalB) handleApprove(tokenContractB, setApprovalB);
               }}
-              disabled={!account || swapTokensState.status === 'Mining' || !approvalA || !approvalB}
-              >
-              `Approve ${approvalA ? symbolA : ''} ${approvalB ? symbolB : ''}`
+              disabled={!account || swapTokensState.status === 'Mining'}
+            >
+              Approve ${approvalA ? symbolA : ''} {approvalB  ? symbolB : ''}
             </Button>
           )) || (
               <Button
@@ -274,7 +276,7 @@ const Swap = () => {
                 fullWidth
                 onClick={handleSwap}
                 disabled={!account || swapTokensState.status === 'Mining' || approvalA || approvalB}
-                              >
+              >
                 Swap
               </Button>
             )}
