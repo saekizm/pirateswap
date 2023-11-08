@@ -43,8 +43,8 @@ const Swap = () => {
     transactionName: 'Swap ETH for Tokens',
   });
 
-  const { send: swapExactTokensForETH } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETH', {
-    transactionName: 'Swap Tokens for ETH',
+  const { send: swapExactTokensForETHSupportingFeeOnTransferTokens } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETHSupportingFeeOnTransferTokens', {
+    transactionName: 'Swap Tokens for ETH Supporting Fee On Transfer Tokens',
   });
 
   const { send: swapExactTokensForTokens, state: swapTokensState } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForTokens', {
@@ -174,12 +174,12 @@ const Swap = () => {
     } else if (isETH(symbolB)) {
       // If token B is ETH, use swapExactTokensForETH
       const parsedAmountA = parseUnits(amountA, decimalsA); // Amount of token A to swap
-      await swapExactTokensForETH(
+      await swapExactTokensForETHSupportingFeeOnTransferTokens(
         parsedAmountA,
         0,  // Min amount of ETH to accept (with slippage)
         path,              // Path: [tokenA, WCRO]
         account,
-        Math.floor(Date.now() / 1000) + 60 * 20  // Deadline
+        Math.floor(Date.now() / 1000) + 60 * 20,  // Deadline
       );
     } else {
       // If neither token is ETH, use swapExactTokensForTokens
