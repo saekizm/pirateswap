@@ -2,12 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useEthers, useTokenBalance, useContractFunction, useEtherBalance } from '@usedapp/core';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits, parseUnits } from '@ethersproject/units';
-import { Button, Grid, Typography, Container } from '@mui/material';
+import { Button, Grid, Typography, Container, IconButton } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants, BigNumber } from 'ethers';
 import TokenDialog from './TokenDialog';
 import useBalance from './useBalance';
+import { SettingModal } from './SettingModal';
 
 const Swap = () => {
   const [tokenA, setTokenA] = useState('');
@@ -26,6 +28,14 @@ const Swap = () => {
   const tokenBBalance = useBalance(tokenB, symbolB, account);
   const [decimalsA, setDecimalsA] = useState(null);
   const [decimalsB, setDecimalsB] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState({
+    gasSpeed: 'Standard',
+    slippage: '',
+    deadline: ''
+  });
+
+
 
   const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02, provider);
 
@@ -51,7 +61,7 @@ const Swap = () => {
     transactionName: 'Swap Tokens for Tokens',
   });
 
-  
+
 
   useEffect(() => {
     if (tokenContractA && account && amountA) {
@@ -59,20 +69,20 @@ const Swap = () => {
         const allowance = await tokenContractA.allowance(account, addresses[MAINNET_ID].router02);
         setApprovalA(allowance.lt(parseUnits(amountA, decimalsA)));
       };
-  
+
       checkApprovalA();
     }
-  
+
     if (tokenContractB && account && amountB) {
       const checkApprovalB = async () => {
         const allowance = await tokenContractB.allowance(account, addresses[MAINNET_ID].router02);
         setApprovalB(allowance.lt(parseUnits(amountB, decimalsB)));
       };
-  
+
       checkApprovalB();
     }
   }, [provider, account, tokenA, tokenB, tokenContractA, tokenContractB, amountA, amountB, decimalsA, decimalsB]);
-  
+
 
 
   const getAmount = async (value, field) => {
@@ -83,7 +93,7 @@ const Swap = () => {
       console.log(amountsOut)
       return ({ amountA: value, amountB: formatUnits(amountsOut[1], decimalsB) })
     }
-    else if ( field === 'B' && value) {
+    else if (field === 'B' && value) {
       const parsedAmountB = parseUnits(value, decimalsB);
       const amountsIn = await uniswapV2RouterContract.getAmountsIn(parsedAmountB, [tokenA, tokenB]);
       return ({ amountA: formatUnits(amountsIn[0], decimalsA), amountB: value })
@@ -139,7 +149,7 @@ const Swap = () => {
         setDecimalsA(token.decimals);
         setAmountA('');
         setAmountB('');
-        
+
       } else {
         setApprovalB(false);
         setTokenB(token.address);
@@ -151,48 +161,74 @@ const Swap = () => {
     }
   };
 
-  const handleSwap = async () => {
-    // Define WCRO address for the network (assuming this is your wrapped ETH equivalent)
-    const WCRO = addresses[MAINNET_ID].tokens.WCRO;
+  const handleSettingsChange = (newSettings) => {
+    setSettings(newSettings);
+  };
 
+
+  const handleSwap = async () => {
+    // Define WCRO address for the network
+    const WCRO = addresses[MAINNET_ID].tokens.WCRO;
+  
+    // Extract settings
+    const { slippage, deadline } = settings;
+  
+    // Calculate slippage tolerance and deadline
+    const slippageTolerance = slippage ? parseFloat(slippage) / 100 : 0.01; // Default to 1%
+    const swapDeadline = deadline ? parseInt(deadline) * 60 : 1200; // Default to 20 minutes
+  
     // Check if token A or B is ETH and use the WCRO address in the path
     const path = [
       isETH(symbolA) ? WCRO : tokenA,
       isETH(symbolB) ? WCRO : tokenB,
     ];
-
+  
+    // Convert the deadline to a UNIX timestamp
+    const deadlineTimestamp = Math.floor(Date.now() / 1000) + swapDeadline;
+  
     if (isETH(symbolA)) {
-      // If token A is ETH, use swapExactETHForTokens
-      const parsedAmountBMin = parseUnits(amountB, decimalsB); // Minimum amount of token B to accept
+      // Calculate minimum amount of token B to accept based on slippage
+      const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
+  
       await swapExactETHForTokens(
-        parsedAmountBMin,  // Min amount of tokens B to accept (with slippage)
-        path,              // Path: [WCRO, tokenB]
+        amountBMin,  // Min amount of tokens B to accept
+        path,
         account,
-        Math.floor(Date.now() / 1000) + 60 * 20,  // Deadline
-        { value: parseUnits(amountA, 'ether') }   // Amount of ETH to send
+        deadlineTimestamp,
+        { value: parseUnits(amountA, 'ether') }  // Amount of ETH to send
       );
     } else if (isETH(symbolB)) {
-      // If token B is ETH, use swapExactTokensForETH
-      const parsedAmountA = parseUnits(amountA, decimalsA); // Amount of token A to swap
+      const parsedAmountA = parseUnits(amountA, decimalsA);
+      const amountETHMin = calculateMinAmount(amountA, decimalsA, slippageTolerance);
+  
       await swapExactTokensForETHSupportingFeeOnTransferTokens(
         parsedAmountA,
-        0,  // Min amount of ETH to accept (with slippage)
-        path,              // Path: [tokenA, WCRO]
+        amountETHMin,
+        path,
         account,
-        Math.floor(Date.now() / 1000) + 60 * 20,  // Deadline
+        deadlineTimestamp
       );
     } else {
-      // If neither token is ETH, use swapExactTokensForTokens
-      const parsedAmountA = parseUnits(amountA, decimalsA); // Amount of token A to swap
+      const parsedAmountA = parseUnits(amountA, decimalsA);
+      const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
+  
       await swapExactTokensForTokens(
         parsedAmountA,
-        0,  // Min amount of token B to accept (with slippage)
-        path,              // Path: [tokenA, tokenB]
+        amountBMin,
+        path,
         account,
-        Math.floor(Date.now() / 1000) + 60 * 20  // Deadline
+        deadlineTimestamp
       );
     }
   };
+  
+  // Helper function to calculate minimum amount based on slippage
+  function calculateMinAmount(amount, decimals, slippageTolerance) {
+    const amountBN = parseUnits(amount, decimals);
+    const slippageBN = BigNumber.from(Math.round(slippageTolerance * 10000));
+    return amountBN.sub(amountBN.mul(slippageBN).div(10000));
+  }
+  
 
   const handleTokenSelect = (token) => {
     // handle the token selection
@@ -225,6 +261,17 @@ const Swap = () => {
         bgcolor: "background.paper",
       }}
     >
+      <IconButton
+        onClick={() => setIsSettingsOpen(true)}
+        sx={{ position: "absolute", right: 8, top: 8 }}
+      >
+        <SettingsIcon />
+      </IconButton>
+      <SettingModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSettingsChange={handleSettingsChange}
+      />
       <Typography variant="h6">Swap</Typography>
       <Grid container spacing={3}>
         {/* Input for token A */}
@@ -267,7 +314,7 @@ const Swap = () => {
               }}
               disabled={!account || swapTokensState.status === 'Mining'}
             >
-              Approve ${approvalA ? symbolA : ''} {approvalB  ? symbolB : ''}
+              Approve ${approvalA ? symbolA : ''} {approvalB ? symbolB : ''}
             </Button>
           )) || (
               <Button

@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, Box, DialogActions, Button, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
-export const SettingModal = ({ isOpen, onClose }) => {
+export const SettingModal = ({ isOpen, onClose, onSettingsChange }) => {
   const [gasSpeed, setGasSpeed] = useState('Standard');
   const [slippage, setSlippage] = useState('');
   const [deadline, setDeadline] = useState('');
 
+  const handleClose = () => {
+    onSettingsChange({ gasSpeed, slippage, deadline });
+    onClose();
+    console.log("settings: " + gasSpeed, slippage, deadline)
+  };
+
+
+  const handleSlippageChange = (_, newSlippage) => {
+    setSlippage(newSlippage);
+  };
+
+
+
+
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={handleClose}>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <div>
@@ -27,13 +41,28 @@ export const SettingModal = ({ isOpen, onClose }) => {
         </div>
         <div>
           <h5>Slippage Tolerance</h5>
-          <TextField
-            type="number"
-            value={slippage}
-            onChange={e => setSlippage(e.target.value)}
-            placeholder="Enter slippage..."
-            fullWidth
-          />
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <ToggleButtonGroup
+              value={slippage}
+              exclusive
+              onChange={handleSlippageChange}
+              aria-label="slippage tolerance"
+            >
+              {['0.1', '0.5', '1.0'].map(value => (
+                <ToggleButton key={value} value={value} sx={{ width: '50px' }}>
+                  {`${value}%`}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <TextField
+              size="small"
+              type="number"
+              value={slippage}
+              onChange={(e) => setSlippage(e.target.value)}
+              placeholder="Custom"
+              sx={{ width: '100px' }}
+            />
+          </Box>
         </div>
         <div>
           <h5>Transaction Deadline</h5>
@@ -47,7 +76,7 @@ export const SettingModal = ({ isOpen, onClose }) => {
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Button onClick={handleClose} color="primary">
           Close
         </Button>
       </DialogActions>
