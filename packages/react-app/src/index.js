@@ -6,7 +6,7 @@ import {
   HttpLink,
   InMemoryCache,
 } from "@apollo/client";
-import { Cronos, DAppProvider } from "@usedapp/core";
+import { Cronos, CronosTestnet, DAppProvider } from "@usedapp/core";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -36,7 +36,8 @@ Sentry.init({
 const config = {
   readOnlyChainId: Cronos.chainId,
   readOnlyUrls: {
-    [Cronos.chainId]: "https://rpc-us.spherevaults.com",
+    // [Cronos.chainId]: "https://rpc-us.spherevaults.com",
+    [Cronos.chainId]: "https://evm-cronos.crypto.org",
   },
 };
 const link = new HttpLink({
