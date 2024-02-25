@@ -5,6 +5,8 @@ import Swap from "./components/swap";
 import Liquidity from "./components/liquidity";
 import { Container } from "./components";
 import LandingPage from "./components/LandingPage";
+import Sdabs from "./components/sdabs";
+import Footer from "./components/Footer";
 
 function App() {
   
@@ -16,7 +18,9 @@ function App() {
           <Route path="/" element={<LandingPage/>} />
           <Route path="/swap" element={<Swap />} />
           <Route path="/liquidity" element={<Liquidity />} />
+          <Route path="/sdabs" element={<Sdabs />} />
         </Routes>
+        <Footer />
       </Container>
     </Router>
   );

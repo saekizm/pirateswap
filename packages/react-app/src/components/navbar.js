@@ -64,6 +64,9 @@ function Navbar() {
           <Link href="/liquidity" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
             Liquidity
           </Link>
+          <Link href="/sdabs" color="inherit" underline='none' sx={{marginLeft: 2, marginRight: 2}}>
+            SDABS
+          </Link>
 
           {account ? (
             <>
