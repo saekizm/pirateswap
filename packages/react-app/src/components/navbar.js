@@ -25,6 +25,21 @@ function Navbar() {
         </Link>
       </ListItem>
       <ListItem>
+        <Link href="/sdabs" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
+          SDABS
+        </Link>
+      </ListItem>
+      <ListItem>
+        <Link href="/farms" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
+          Farms
+        </Link>
+      </ListItem>
+      <ListItem>
+        <Link href="/pools" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
+          Pools
+        </Link>
+      </ListItem>
+      <ListItem>
         {account ? (
           <>
             <Typography variant="body1" sx={{ marginRight: 2 }}>
@@ -64,9 +79,17 @@ function Navbar() {
           <Link href="/liquidity" color="inherit" underline="none" sx={{ marginLeft: 2, marginRight: 2 }}>
             Liquidity
           </Link>
-          <Link href="/sdabs" color="inherit" underline='none' sx={{marginLeft: 2, marginRight: 2}}>
+          <Link href="/sdabs" color="inherit" underline='none' sx={{ marginLeft: 2, marginRight: 2 }}>
             SDABS
           </Link>
+          <Link href="/farms" color="inherit" underline='none' sx={{ marginLeft: 2, marginRight: 2 }}>
+            Farms
+          </Link>
+          <Link href="/pools" color="inherit" underline='none' sx={{ marginLeft: 2, marginRight: 2 }}>
+            Pools
+          </Link>
+
+
 
           {account ? (
             <>

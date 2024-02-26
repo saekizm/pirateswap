@@ -7,6 +7,8 @@ import { Container } from "./components";
 import LandingPage from "./components/LandingPage";
 import Sdabs from "./components/sdabs";
 import Footer from "./components/Footer";
+import Farms from "./components/Farms"
+import Pools from "./components/Pools"
 
 function App() {
   
@@ -19,6 +21,8 @@ function App() {
           <Route path="/swap" element={<Swap />} />
           <Route path="/liquidity" element={<Liquidity />} />
           <Route path="/sdabs" element={<Sdabs />} />
+          <Route path="/farms" element={<Farms />} />
+          <Route path="/pools" element={<Pools />} />
         </Routes>
         <Footer />
       </Container>
