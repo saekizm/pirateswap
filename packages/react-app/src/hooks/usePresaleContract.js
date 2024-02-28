@@ -1,12 +1,12 @@
 // src/hooks/usePresaleContract.js
 import { ethers } from 'ethers';
-import { useContractFunction, useCall } from '@usedapp/core';
+import { useContractFunction, useCall, useEthers } from '@usedapp/core';
 import PresaleContractABI from '../components/contracts/src/abis/PresaleContract.json';
 
-const presaleContractAddress = "0x170B24A387BD31CD495b6A5D530613510bE2536C";
+const presaleContractAddress = "0x1DF5ed77598aEeC7Ae928a33e4a07dBfbD8e0478";
 const presaleInterface = new ethers.utils.Interface(PresaleContractABI);
-
 export const usePresaleContract = () => {
+  const {account} = useEthers();
   const presaleContract = new ethers.Contract(presaleContractAddress, presaleInterface);
   const { state, send } = useContractFunction(presaleContract, 'buyTokensNFTSale', {
     transactionName: 'Buy NFT Sale',
@@ -26,7 +26,13 @@ export const usePresaleContract = () => {
     args: [],
   })?.value?.[0];
 
+  const allocations = useCall({
+    contract: presaleContract,
+    method: 'allocations',
+    args: [account],
+  })?.value?.[0];
+
   // Add other necessary read operations in a similar fashion
 
-  return { state, send, tokenPriceInCRO, nftSaleSold };
+  return { state, send, tokenPriceInCRO, allocations, nftSaleSold };
 };

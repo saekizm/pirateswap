@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { parseUnits, formatUnits } from 'ethers/lib/utils';
+import { parseUnits, formatUnits, hexlify } from 'ethers/lib/utils';
 import { useEthers } from '@usedapp/core';
 import { usePresaleContract } from '../hooks/usePresaleContract';
 import { getMerkleProof } from '../utils/merkleTree';
@@ -7,7 +7,7 @@ import { Button, TextField, Box, Container, Typography, LinearProgress } from '@
 
 export const WhitelistPresale = () => {
     const { account } = useEthers();
-    const { state, send, tokenPriceInCRO, nftSaleSold } = usePresaleContract();
+    const { state, send, tokenPriceInCRO, allocations, nftSaleSold } = usePresaleContract();
     const [mintAmount, setMintAmount] = useState(1);
     const totalTokens = 2000000;
     const saleProgress = nftSaleSold ? (parseFloat(formatUnits(nftSaleSold, 18)) / totalTokens) * 100 : 0;
@@ -15,9 +15,30 @@ export const WhitelistPresale = () => {
 
     const handleMint = async () => {
         if (!account) return;
+
         const merkleProof = getMerkleProof(account);
-        send(merkleProof, {value: parseUnits(mintAmount.toString(), 'ether')});
+
+        console.log("Generated Merkle Proof: ", merkleProof);
+
+        // Optionally, log the Merkle root you're checking against
+        console.log("Merkle Root: ", "0xf2c86d8565354c9c959bb636cd8dca13fa86f2b95c8ef9a7ddeb015f70ba9edf");
+
+        // Check if merkleProof is not empty or undefined to ensure the account has a valid proof
+        if (!merkleProof || merkleProof.length === 0) {
+            console.error("Account is not in the whitelist or failed to generate Merkle proof.");
+            return;
+        }
+
+        // If the proof is valid, proceed with the minting process
+        const options = {
+            value: parseUnits(mintAmount.toString(), 'ether'),
+            gasLimit: hexlify(100000), // Example gas limit, adjust based on needs
+        };
+
+        send(merkleProof, options);
     };
+
+
 
     return (
         <Container maxWidth="sm" sx={{
@@ -44,7 +65,7 @@ export const WhitelistPresale = () => {
                 <Typography variant="body2">Sale Progress</Typography>
                 <LinearProgress variant="determinate" value={saleProgress} />
                 <Typography variant="body2" align="right">
-                {nftSaleSold ? formatUnits(nftSaleSold, 18) : '0'} / {totalTokens} sold
+                    {nftSaleSold ? formatUnits(nftSaleSold, 18) : '0'} / {totalTokens} sold
                 </Typography>
             </Box>
             <Box sx={{
@@ -54,6 +75,9 @@ export const WhitelistPresale = () => {
                 alignItems: 'center',
                 gap: 2,
             }}>
+                <Typography variant="body2">
+                    Your tokens: {allocations ? formatUnits(allocations, 18) : '0'} will be claimable at launch.
+                </Typography>
                 <TextField
                     fullWidth
                     label="Enter CRO Amount"
