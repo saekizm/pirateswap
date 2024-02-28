@@ -9,6 +9,7 @@ import Sdabs from "./components/sdabs";
 import Footer from "./components/Footer";
 import Farms from "./components/Farms"
 import Pools from "./components/Pools"
+import { WhitelistPresale } from "./components/WhitelistPresale";
 
 function App() {
   
@@ -23,6 +24,7 @@ function App() {
           <Route path="/sdabs" element={<Sdabs />} />
           <Route path="/farms" element={<Farms />} />
           <Route path="/pools" element={<Pools />} />
+          <Route path="/presale" element={<WhitelistPresale />} />
         </Routes>
         <Footer />
       </Container>
