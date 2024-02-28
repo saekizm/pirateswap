@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { useContractFunction, useCall } from '@usedapp/core';
 import PresaleContractABI from '../components/contracts/src/abis/PresaleContract.json';
 
-const presaleContractAddress = "0x46223e8820d2428053fc3c49A3b837F9BfBF3a84";
+const presaleContractAddress = "0x170B24A387BD31CD495b6A5D530613510bE2536C";
 const presaleInterface = new ethers.utils.Interface(PresaleContractABI);
 
 export const usePresaleContract = () => {

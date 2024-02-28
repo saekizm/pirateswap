@@ -9,7 +9,7 @@ export const WhitelistPresale = () => {
     const { account } = useEthers();
     const { state, send, tokenPriceInCRO, nftSaleSold } = usePresaleContract();
     const [mintAmount, setMintAmount] = useState(1);
-    const totalTokens = 1000000;
+    const totalTokens = 2000000;
     const saleProgress = nftSaleSold ? (parseFloat(formatUnits(nftSaleSold, 18)) / totalTokens) * 100 : 0;
     const price = tokenPriceInCRO ? (parseFloat(formatUnits(tokenPriceInCRO, 18))) : 0.009737;
 
