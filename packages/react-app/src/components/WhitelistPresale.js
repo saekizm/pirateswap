@@ -7,10 +7,10 @@ import { Button, TextField, Box, Container, Typography, LinearProgress } from '@
 
 export const WhitelistPresale = () => {
     const { account } = useEthers();
-    const { state, send, tokenPriceInCRO, allocations, nftSaleSold } = usePresaleContract();
+    const { state, send, tokenPriceInCRO, allocations, topHoldersSaleSold } = usePresaleContract();
     const [mintAmount, setMintAmount] = useState(1);
     const totalTokens = 2000000;
-    const saleProgress = nftSaleSold ? (parseFloat(formatUnits(nftSaleSold, 18)) / totalTokens) * 100 : 0;
+    const saleProgress = topHoldersSaleSold ? (parseFloat(formatUnits(topHoldersSaleSold, 18)) / totalTokens) * 100 : 0;
     const price = tokenPriceInCRO ? (parseFloat(formatUnits(tokenPriceInCRO, 18))) : 0.009737;
 
     const handleMint = async () => {
@@ -18,14 +18,9 @@ export const WhitelistPresale = () => {
 
         const merkleProof = getMerkleProof(account);
 
-        console.log("Generated Merkle Proof: ", merkleProof);
-
-        // Optionally, log the Merkle root you're checking against
-        console.log("Merkle Root: ", "0xf2c86d8565354c9c959bb636cd8dca13fa86f2b95c8ef9a7ddeb015f70ba9edf");
-
         // Check if merkleProof is not empty or undefined to ensure the account has a valid proof
         if (!merkleProof || merkleProof.length === 0) {
-            console.error("Account is not in the whitelist or failed to generate Merkle proof.");
+            alert("Account is not in the whitelist or failed to generate Merkle proof.");
             return;
         }
 
@@ -65,7 +60,7 @@ export const WhitelistPresale = () => {
                 <Typography variant="body2">Sale Progress</Typography>
                 <LinearProgress variant="determinate" value={saleProgress} />
                 <Typography variant="body2" align="right">
-                    {nftSaleSold ? formatUnits(nftSaleSold, 18) : '0'} / {totalTokens} sold
+                    {topHoldersSaleSold ? formatUnits(topHoldersSaleSold, 18) : '0'} / {totalTokens} sold
                 </Typography>
             </Box>
             <Box sx={{

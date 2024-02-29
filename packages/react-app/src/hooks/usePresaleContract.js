@@ -8,8 +8,8 @@ const presaleInterface = new ethers.utils.Interface(PresaleContractABI);
 export const usePresaleContract = () => {
   const {account} = useEthers();
   const presaleContract = new ethers.Contract(presaleContractAddress, presaleInterface);
-  const { state, send } = useContractFunction(presaleContract, 'buyTokensNFTSale', {
-    transactionName: 'Buy NFT Sale',
+  const { state, send } = useContractFunction(presaleContract, 'buyTokensTopHoldersSale', {
+    transactionName: 'Buy Top Holder Sale',
   });
 
   // Function to fetch token price
@@ -20,9 +20,9 @@ export const usePresaleContract = () => {
   })?.value?.[0];
 
   // Function to fetch NFT sale sold amount
-  const nftSaleSold = useCall({
+  const topHoldersSaleSold = useCall({
     contract: presaleContract,
-    method: 'nftSaleSold',
+    method: 'topHoldersSaleSold',
     args: [],
   })?.value?.[0];
 
@@ -34,5 +34,5 @@ export const usePresaleContract = () => {
 
   // Add other necessary read operations in a similar fashion
 
-  return { state, send, tokenPriceInCRO, allocations, nftSaleSold };
+  return { state, send, tokenPriceInCRO, allocations, topHoldersSaleSold };
 };
