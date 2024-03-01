@@ -2,27 +2,19 @@ import React, { useState } from 'react';
 import { parseUnits, formatUnits, hexlify } from 'ethers/lib/utils';
 import { useEthers } from '@usedapp/core';
 import { usePresaleContract } from '../hooks/usePresaleContract';
-import { getMerkleProof } from '../utils/merkleTree';
 import { Button, TextField, Box, Container, Typography, LinearProgress } from '@mui/material';
 
 export const WhitelistPresale = () => {
     const { account } = useEthers();
-    const { state, send, tokenPriceInCRO, allocations, topHoldersSaleSold } = usePresaleContract();
+    const { state, send, tokenPriceInCRO, allocations, publicSaleSold } = usePresaleContract();
     const [mintAmount, setMintAmount] = useState(1);
-    const totalTokens = 2000000;
-    const saleProgress = topHoldersSaleSold ? (parseFloat(formatUnits(topHoldersSaleSold, 18)) / totalTokens) * 100 : 0;
+    const totalTokens = 3000000;
+    const saleProgress = publicSaleSold ? (parseFloat(formatUnits(publicSaleSold, 18)) / totalTokens) * 100 : 0;
     const price = tokenPriceInCRO ? (parseFloat(formatUnits(tokenPriceInCRO, 18))) : 0.009737;
 
     const handleMint = async () => {
         if (!account) return;
 
-        const merkleProof = getMerkleProof(account);
-
-        // Check if merkleProof is not empty or undefined to ensure the account has a valid proof
-        if (!merkleProof || merkleProof.length === 0) {
-            alert("Account is not in the whitelist or failed to generate Merkle proof.");
-            return;
-        }
 
         // If the proof is valid, proceed with the minting process
         const options = {
@@ -30,7 +22,7 @@ export const WhitelistPresale = () => {
             gasLimit: hexlify(100000), // Example gas limit, adjust based on needs
         };
 
-        send(merkleProof, options);
+        send(options);
     };
 
 
@@ -60,7 +52,7 @@ export const WhitelistPresale = () => {
                 <Typography variant="body2">Sale Progress</Typography>
                 <LinearProgress variant="determinate" value={saleProgress} />
                 <Typography variant="body2" align="right">
-                    {topHoldersSaleSold ? formatUnits(topHoldersSaleSold, 18) : '0'} / {totalTokens} sold
+                    {publicSaleSold ? formatUnits(publicSaleSold, 18) : '0'} / {totalTokens} sold
                 </Typography>
             </Box>
             <Box sx={{
