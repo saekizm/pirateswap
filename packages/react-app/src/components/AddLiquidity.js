@@ -31,11 +31,17 @@ const AddLiquidity = ({ initialPair }) => {
   const tokenBBalance = useBalance(tokenB, symbolB, account);
   const factory = new Contract(addresses[MAINNET_ID].factory, abis.factory, provider);
   const uniswapV2RouterContract = new Contract(addresses[MAINNET_ID].router02, abis.router02);
+  const liquidityMaker = new Contract(addresses[MAINNET_ID].liquidityMaker, abis.liquidityMaker);
+
+
   const { send: addLiquidity, state: addLiquidityState } = useContractFunction(uniswapV2RouterContract, 'addLiquidity', {
     transactionName: 'Add Liquidity',
   });
   const { send: addLiquidityETH, state: addLiquidityETHState } = useContractFunction(uniswapV2RouterContract, 'addLiquidityETH', {
     transactionName: 'Add LiquiditETH',
+  });
+  const { send: addLiquidityCRO, state: addLiquidityCROState } = useContractFunction(liquidityMaker, 'addLiquidityCRO', {
+    transactionName: 'Add Liquidity CRO'
   });
   const tokenContractA = useMemo(() => {
     return new Contract(tokenA, abis.erc20.abi, provider.getSigner());
@@ -78,25 +84,31 @@ const AddLiquidity = ({ initialPair }) => {
     }
   };
 
-  const checkAllowance = async (tokenContract, amount, decimals, setApproval) => {
+  const checkAllowance = async (tokenContract, amount, decimals, setApproval, spenderAddress = addresses[MAINNET_ID].router02) => {
     if (account && tokenContract && amount && decimals) {
       const amountBN = parseUnits(amount, decimals); // Convert the desired amount to BigNumber using its decimals
-      const allowance = await tokenContract.allowance(account, addresses[MAINNET_ID].router02);
-      setApproval(!allowance.gte(amountBN)); // Set approval to true if allowance is greater than or equal to the amount
+      const allowance = await tokenContract.allowance(account, spenderAddress);
+      setApproval(!allowance.gte(amountBN));
     }
   };
+
   // For token A
   useEffect(() => {
-    if (tokenContractA && account) {
-      checkAllowance(tokenContractA, amountA, decimalsA, setApprovalA);
+    if (tokenContractA && account && symbolA !== 'CRO') {
+      const spender = (symbolA === 'SPHERE' || symbolB === 'SPHERE') ? addresses[MAINNET_ID].liquidityMaker : addresses[MAINNET_ID].router02;
+      checkAllowance(tokenContractA, amountA, decimalsA, setApprovalA, spender);
     }
-  }, [tokenContractA, account, amountA, decimalsA]);
+  }, [tokenContractA, account, amountA, decimalsA, symbolA, symbolB]);
+
   // For token B
   useEffect(() => {
-    if (tokenContractB && account) {
-      checkAllowance(tokenContractB, amountB, decimalsB, setApprovalB);
+    if (tokenContractB && account && symbolB !== 'CRO') {
+      const spender = (symbolA === 'SPHERE' || symbolB === 'SPHERE') ? addresses[MAINNET_ID].liquidityMaker : addresses[MAINNET_ID].router02;
+      checkAllowance(tokenContractB, amountB, decimalsB, setApprovalB, spender);
     }
-  }, [tokenContractB, account, amountB, decimalsB]);
+  }, [tokenContractB, account, amountB, decimalsB, symbolA, symbolB]);
+
+
 
   const getAmount = async (inputValue, field) => {
     if (!pairContract) {
@@ -193,46 +205,64 @@ const AddLiquidity = ({ initialPair }) => {
       const parsedAmountA = parseUnits(amountA, decimalsA);
       const parsedAmountB = parseUnits(amountB, decimalsB);
 
-      if (symbolA === 'CRO') {
-        // If token A is ETH, call addLiquidityETH
-        await addLiquidityETH(
-          tokenB, // Token address for token B (ERC-20)
-          parsedAmountB, // Amount of token B
-          0, // Min amount of token B (with slippage)
-          0, // Min amount of ETH (with slippage)
-          account, // User's account address
-          Math.floor(Date.now() / 1000) + 60 * 20, // Deadline
-          { value: parsedAmountA } // Amount of ETH to send with the transaction
-        );
-      } else if (symbolB === 'CRO') {
-        // If token B is ETH, call addLiquidityETH
-        await addLiquidityETH(
-          tokenA, // Token address for token A (ERC-20)
-          parsedAmountA, // Amount of token A
-          0, // Min amount of token A (with slippage)
-          0, // Min amount of ETH (with slippage)
-          account, // User's account address
-          Math.floor(Date.now() / 1000) + 60 * 20, // Deadline
-          { value: parsedAmountB } // Amount of ETH to send with the transaction
-        );
+      if ((symbolA === 'SPHERE' || symbolA === 'CRO') && (symbolB === 'SPHERE' || symbolB === 'CRO')) {
+
+        // Check if approvals are set before proceeding
+        if (approvalA || approvalB) return; // Wait for user to approve
+
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the current time
+        try {
+          // Assuming SPHERE is tokenA for simplicity, adjust as necessary
+          const sphereAmount = symbolA === "SPHERE" ? parsedAmountA : parsedAmountB;
+          const croAmount = symbolA === "SPHERE" ? parsedAmountB : parsedAmountA; // Assuming CRO is sent as msg.value for simplicity
+
+          await addLiquidityCRO(
+            sphereAmount,
+            0, // minSphere, adjust as per your requirement
+            0, // minCRO, adjust as per your requirement
+            deadline,
+            { value: croAmount }
+          );
+        } catch (error) {
+          console.error("Error adding liquidity for SPHERE/CRO pair:", error);
+        }
       } else {
-        // If neither token is ETH, call the standard addLiquidity
-        await addLiquidity(
-          tokenA, // Token address for token A
-          tokenB, // Token address for token B
-          parsedAmountA, // Amount of token A
-          parsedAmountB, // Amount of token B
-          0, // Min amount of token A (with slippage)
-          0, // Min amount of token B (with slippage)
-          account, // User's account address
-          Math.floor(Date.now() / 1000) + 60 * 20 // Deadline
-        );
+        if (approvalA || approvalB) return; // Wait for user to approve
+
+        // Standard liquidity addition for other pairs
+        try {
+          const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the current time
+          if (symbolA === "CRO" || symbolB === "CRO") {
+            const tokenNonCRO = symbolA === "CRO" ? tokenB : tokenA;
+            const amountNonCRO = symbolA === "CRO" ? parsedAmountB : parsedAmountA;
+            await addLiquidityETH(
+              tokenNonCRO,
+              amountNonCRO,
+              0, // Min token amount, adjust as needed
+              0, // Min ETH amount, adjust as needed
+              account,
+              deadline,
+              { value: symbolA === "CRO" ? parsedAmountA : parsedAmountB }
+            );
+          } else {
+            await addLiquidity(
+              tokenA,
+              tokenB,
+              parsedAmountA,
+              parsedAmountB,
+              0, // Min amount of token A, adjust as needed
+              0, // Min amount of token B, adjust as needed
+              account,
+              deadline
+            );
+          }
+        } catch (error) {
+          console.error("Error adding liquidity:", error);
+        }
       }
-    } else {
+    };
+  }
 
-
-    }
-  };
 
   const handleOpenDialog = (field) => {
     setTokenField(field);
@@ -259,9 +289,9 @@ const AddLiquidity = ({ initialPair }) => {
     handleCloseDialog(token); // this function now acts as the onSelect handler
   };
 
-  const handleApprove = async (tokenContract, setApproval) => {
+  const handleApprove = async (tokenContract, setApproval, spenderAddress = addresses[MAINNET_ID].router02) => {
     try {
-      const transactionResponse = await tokenContract.approve(addresses[MAINNET_ID].router02, constants.MaxUint256);
+      const transactionResponse = await tokenContract.approve(spenderAddress, constants.MaxUint256);
       // You could add a loading state here
       await transactionResponse.wait();  // wait for the transaction to be mined
       setApproval(false); // Reflecting the approval in the UI
@@ -321,17 +351,22 @@ const AddLiquidity = ({ initialPair }) => {
         <Grid item xs={12}>
           {(approvalA || approvalB) ? (
             <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => {
-                if (approvalA) handleApprove(tokenContractA, setApprovalA);
-                if (approvalB) handleApprove(tokenContractB, setApprovalB);
-              }}
-              disabled={!account || addLiquidityState.status === 'Mining'}
-            >
-              Approve {approvalA ? symbolA : ''} {approvalB ? symbolB : ''}
-            </Button>
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={() => {
+              // Determine the spender based on the token pairs involved
+              const isSphereCroPair = (symbolA === 'SPHERE' || symbolB === 'SPHERE') && (symbolA === 'CRO' || symbolB === 'CRO');
+              const spenderAddress = isSphereCroPair ? addresses[MAINNET_ID].liquidityMaker : addresses[MAINNET_ID].router02;
+              
+              if (approvalA) handleApprove(tokenContractA, setApprovalA, spenderAddress);
+              if (approvalB) handleApprove(tokenContractB, setApprovalB, spenderAddress);
+            }}
+            disabled={!account || addLiquidityState.status === 'Mining'}
+          >
+            Approve {approvalA ? symbolA : ''} {approvalB ? symbolB : ''}
+          </Button>
+          
           ) : (
             <Button
               variant="contained"
