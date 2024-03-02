@@ -21,10 +21,9 @@ function App() {
           <Route path="/" element={<LandingPage/>} />
           <Route path="/swap" element={<Swap />} />
           <Route path="/liquidity" element={<Liquidity />} />
-          <Route path="/sdabs" element={<Sdabs />} />
+          <Route path="/sdabs" element={<WhitelistPresale />} />
           <Route path="/farms" element={<Farms />} />
           <Route path="/pools" element={<Pools />} />
-          <Route path="/presale" element={<WhitelistPresale />} />
         </Routes>
         <Footer />
       </Container>
