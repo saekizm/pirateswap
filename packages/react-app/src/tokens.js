@@ -1,4 +1,5 @@
 export const TOKENS = [
+  {symbol: "SDABS", address: "0xFf44a2935376Df4Df3a4eE1fdf6Cf31513b6152d", decimals: "18"},
   { symbol: "SPHERE", address: "0xc9FDE867a14376829Ab759F4C4871F67e2d3E441", decimals: "18" },
   { symbol: "CRO", address: "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23", decimals: "18" },
   { symbol: "USDC", address: "0xc21223249CA28397B4B6541dfFaEcC539BfF0c59", decimals: "6" },

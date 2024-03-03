@@ -8,8 +8,8 @@ const presaleInterface = new ethers.utils.Interface(PresaleContractABI);
 export const usePresaleContract = () => {
   const {account} = useEthers();
   const presaleContract = new ethers.Contract(presaleContractAddress, presaleInterface);
-  const { state, send } = useContractFunction(presaleContract, 'buyTokensPublicSale', {
-    transactionName: 'Buy Public Sale',
+  const { state, send } = useContractFunction(presaleContract, 'withdrawTokens', {
+    transactionName: 'Withdraw Tokens',
   });
 
   // Function to fetch token price

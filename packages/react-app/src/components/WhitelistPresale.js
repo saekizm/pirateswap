@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { parseUnits, formatUnits, hexlify } from 'ethers/lib/utils';
 import { useEthers } from '@usedapp/core';
 import { usePresaleContract } from '../hooks/usePresaleContract';
-import { Button, TextField, Box, Container, Typography, LinearProgress } from '@mui/material';
+import { Button, TextField, Box, Container, Typography, LinearProgress, Paper } from '@mui/material';
+import useCountdown from './useCountdown';
+
 
 export const WhitelistPresale = () => {
     const { account } = useEthers();
@@ -12,17 +14,24 @@ export const WhitelistPresale = () => {
     const saleProgress = publicSaleSold ? (parseFloat(formatUnits(publicSaleSold, 18)) / totalTokens) * 100 : 0;
     const price = tokenPriceInCRO ? (parseFloat(formatUnits(tokenPriceInCRO, 18))) : 0.009737;
 
+    const [days, hours, minutes, seconds] = useCountdown('2024-03-03T20:00:00Z');
+
+
     const handleMint = async () => {
         if (!account) return;
 
 
         // If the proof is valid, proceed with the minting process
         const options = {
-            value: parseUnits(mintAmount.toString(), 'ether'),
             gasLimit: hexlify(100000), // Example gas limit, adjust based on needs
         };
 
-        send(options);
+        send(options)
+            .then((tx) => tx.wait()) // Wait for transaction to be mined
+            .then(() => alert("Tokens Claimed!"))
+            .catch((error) => console.error(error));
+
+
     };
 
 
@@ -42,19 +51,15 @@ export const WhitelistPresale = () => {
             borderRadius: 2,
             bgcolor: 'background.paper',
         }}>
-            <Typography variant="h6" component="h2" marginBottom={2}>
-                Pirates Presale
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'white', textDecoration: "overline underline", textShadow: "2px  2px 4px #000000" }}>
+                SDABS Token Launch
             </Typography>
-            <Typography variant="body1">
-                Price per token: {price} CRO
+
+            <Typography variant="h4" sx={{ fontWeight: 'medium', mb: 2, textAlign: 'center' }}>
+                {`Launch in: ${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`}
             </Typography>
-            <Box width="100%" mb={2}>
-                <Typography variant="body2">Sale Progress</Typography>
-                <LinearProgress variant="determinate" value={saleProgress} />
-                <Typography variant="body2" align="right">
-                    {publicSaleSold ? formatUnits(publicSaleSold, 18) : '0'} / {totalTokens} sold
-                </Typography>
-            </Box>
+
+
             <Box sx={{
                 width: '100%',
                 display: 'flex',
@@ -65,16 +70,8 @@ export const WhitelistPresale = () => {
                 <Typography variant="body2">
                     Your tokens: {allocations ? formatUnits(allocations, 18) : '0'} will be claimable at launch.
                 </Typography>
-                <TextField
-                    fullWidth
-                    label="Enter CRO Amount"
-                    type="number"
-                    variant="outlined"
-                    value={mintAmount}
-                    onChange={(e) => setMintAmount(Number(e.target.value))}
-                />
                 <Button variant="contained" onClick={handleMint} disabled={!account || state.status === 'Mining'}>
-                    Buy
+                    Claim
                 </Button>
                 {state.errorMessage && <Typography color="error">{state.errorMessage}</Typography>}
             </Box>
