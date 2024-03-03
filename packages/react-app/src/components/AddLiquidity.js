@@ -27,6 +27,7 @@ const AddLiquidity = ({ initialPair }) => {
   const [decimalsB, setDecimalsB] = useState(null);
   const [symbolA, setSymbolA] = useState(null)
   const [symbolB, setSymbolB] = useState(null)
+  const [isInitialLiquidity, setIsInitialLiquidity] = useState(false);
   const tokenABalance = useBalance(tokenA, symbolA, account);
   const tokenBBalance = useBalance(tokenB, symbolB, account);
   const factory = new Contract(addresses[MAINNET_ID].factory, abis.factory, provider);
@@ -50,6 +51,18 @@ const AddLiquidity = ({ initialPair }) => {
   const tokenContractB = useMemo(() => {
     return new Contract(tokenB, abis.erc20.abi, provider.getSigner());
   }, [tokenB, provider]);
+
+  useEffect(() => {
+    const checkInitialLiquidity = async () => {
+      if (!pairContract) return;
+  
+      const [reserveA, reserveB] = await pairContract.getReserves();
+      setIsInitialLiquidity(reserveA.isZero() && reserveB.isZero());
+    };
+  
+    checkInitialLiquidity();
+  }, [pairContract]);
+  
 
   const handlePercentage = async (field, percentage) => {
     let balance, decimals;
@@ -111,6 +124,11 @@ const AddLiquidity = ({ initialPair }) => {
 
 
   const getAmount = async (inputValue, field) => {
+    if (isInitialLiquidity) {
+      // Directly return the input values since there's no existing liquidity to base calculations on
+      return field === 'A' ? { amountA: inputValue, amountB: amountB } : { amountA: amountA, amountB: inputValue };
+    }
+  
     if (!pairContract) {
       console.error('Pair contract or tokens not set:', pairContract, tokenA, tokenB);
       return { amountA: '', amountB: '' };
