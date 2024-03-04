@@ -24,8 +24,8 @@ Sentry.init({
   // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
   tracePropagationTargets: [
     "localhost",
-    /^https:\/\/spacepirates\.finance\/api/,
-    /^https:\/\/rpc-us.spherevaults\.com\/graphbase/,
+    /^https:\/\/spacepirates\.finance/,
+    /^https:\/\/rpc\.spacepirates\.finance\/graphbase/,
   ],
 });
 
@@ -41,7 +41,7 @@ const config = {
   },
 };
 const link = new HttpLink({
-  uri: "https://rpc-us.spherevaults.com/graphbase/subgraphs/name/pswap/factorypair",
+  uri: "https://rpc.spacepirates.finance/graphbase/subgraphs/name/pswap/factorypair",
 });
 // This is the official Uniswap v2 subgraph. You can replace it with your own, if you need to.
 // See all subgraphs: https://thegraph.com/explorer/
