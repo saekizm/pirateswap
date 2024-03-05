@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Button,
   Box,
   FormControl,
-  InputAdornment,
-  IconButton,
-  OutlinedInput,
-  FormHelperText,
   InputLabel,
+  OutlinedInput,
   Grid,
-  Typography
+  Typography,
+  IconButton,
+  InputAdornment
 } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { debounce } from 'lodash';
 
 const TokenInput = ({
   amount,
-  setAmountA, 
-  setAmountB, 
+  setAmountA,
+  setAmountB,
   label,
   field,
   getAmount,
@@ -24,39 +24,60 @@ const TokenInput = ({
   handleOpenDialog,
   symbol
 }) => {
-  // Function to decide which amount setter to use
-  const handleAmountChange = async (e) => {
-    console.log("input");
-    const value = e.target.value; // Extract the value once to avoid event pooling issues
-    console.log(value); // Check what the value is when you hit backspace
-  
+  // State to handle the local input value for debouncing
+  const [inputValue, setInputValue] = useState(amount);
+  const [isUserInput, setIsUserInput] = useState(true);
+
+
+  useEffect(() => {
+    setInputValue(amount); // Update local state when amount changes externally
+  }, [amount]);
+
+  const debouncedInputChange = useCallback(debounce(async (value) => {
     if (!value) {
-      // Handle empty input case by resetting the amounts
       setAmountA('');
       setAmountB('');
-      return; // Exit early
+      return;
     }
   
     try {
       const amounts = await getAmount(value, field);
-      setAmountA(amounts.amountA);
-      setAmountB(amounts.amountB);
+      if (isUserInput) { // Check if the change was directly by the user
+        if (field === 'A') {
+          setAmountB(amounts.amountB);
+        } else {
+          setAmountA(amounts.amountA);
+        }
+        setIsUserInput(false); // Reset the flag after programmatic update
+      }
     } catch (error) {
       console.error(`Failed to get amounts for field ${field}`, error);
-      // Handle the error state appropriately
-      // Maybe reset the amounts or provide feedback to the user
     }
+  }, 500), [getAmount, field, setAmountA, setAmountB, isUserInput]);
+  
+
+  useEffect(() => {
+    if (inputValue && isUserInput) {
+      debouncedInputChange(inputValue);
+    }
+    // No need to include `isUserInput` in the dependency array to avoid re-triggering when it changes.
+  }, [inputValue, debouncedInputChange]);
+  
+
+  const handleChange = (e) => {
+    const { value } = e.target;
+    setInputValue(value); // Update local state with the input value for debouncing
+    setIsUserInput(true); // Indicate this update is directly from user input
   };
   
-  
-  
+
   return (
     <FormControl fullWidth variant="outlined" sx={{ marginBottom: 2 }}>
       <InputLabel htmlFor={`outlined-adornment-amount-${field}`}>{label}</InputLabel>
       <OutlinedInput
         id={`outlined-adornment-amount-${field}`}
-        value={amount}
-        onChange={handleAmountChange}
+        value={inputValue}
+        onChange={handleChange}
         label={label}
       />
       <Box sx={{ mt: 1 }}>
@@ -66,7 +87,7 @@ const TokenInput = ({
               {[25, 50, 75, 100].map((percentage, index) => (
                 <Grid item xs={3} key={index}>
                   <Button fullWidth variant="outlined" onClick={() => handlePercentage(field, percentage)}>
-                    {percentage === 100 ? 'Max' : `${percentage}%`}
+                    {percentage}% 
                   </Button>
                 </Grid>
               ))}
@@ -74,7 +95,7 @@ const TokenInput = ({
           </Grid>
           <Grid item xs={12} sm={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
             <Typography variant="body2" sx={{ mr: 1 }}>
-            {symbol}
+              {symbol}
             </Typography>
             <IconButton
               size="small"
