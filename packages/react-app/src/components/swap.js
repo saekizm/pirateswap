@@ -53,6 +53,10 @@ const Swap = () => {
     transactionName: 'Swap ETH for Tokens',
   });
 
+  const { send: swapExactTokensForETH } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETH', {
+    transactionName: 'Swap Tokens for ETH'
+  });
+
   const { send: swapExactTokensForETHSupportingFeeOnTransferTokens } = useContractFunction(uniswapV2RouterContract, 'swapExactTokensForETHSupportingFeeOnTransferTokens', {
     transactionName: 'Swap Tokens for ETH Supporting Fee On Transfer Tokens',
   });
@@ -158,7 +162,7 @@ const Swap = () => {
         setAmountB('');
         setAmountA('');
       }
-    }
+          }
   };
 
   const handleSettingsChange = (newSettings) => {
@@ -169,66 +173,74 @@ const Swap = () => {
   const handleSwap = async () => {
     // Define WCRO address for the network
     const WCRO = addresses[MAINNET_ID].tokens.WCRO;
-  
+
     // Extract settings
     const { slippage, deadline } = settings;
-  
+
     // Calculate slippage tolerance and deadline
     const slippageTolerance = slippage ? parseFloat(slippage) / 100 : 0.01; // Default to 1%
     const swapDeadline = deadline ? parseInt(deadline) * 60 : 1200; // Default to 20 minutes
-  
+
     // Check if token A or B is ETH and use the WCRO address in the path
     const path = [
       isETH(symbolA) ? WCRO : tokenA,
       isETH(symbolB) ? WCRO : tokenB,
     ];
-  
+
     // Convert the deadline to a UNIX timestamp
     const deadlineTimestamp = Math.floor(Date.now() / 1000) + swapDeadline;
-  
-    if (isETH(symbolA)) {
-      // Calculate minimum amount of token B to accept based on slippage
-      const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
-  
-      await swapExactETHForTokens(
-        amountBMin,  // Min amount of tokens B to accept
-        path,
-        account,
-        deadlineTimestamp,
-        { value: parseUnits(amountA, 'ether') }  // Amount of ETH to send
-      );
-    } else if (isETH(symbolB)) {
-      const parsedAmountA = parseUnits(amountA, decimalsA);
-      const amountETHMin = calculateMinAmount(amountA, decimalsA, slippageTolerance);
-  
-      await swapExactTokensForETHSupportingFeeOnTransferTokens(
-        parsedAmountA,
-        amountETHMin,
-        path,
-        account,
-        deadlineTimestamp
-      );
-    } else {
-      const parsedAmountA = parseUnits(amountA, decimalsA);
-      const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
-  
-      await swapExactTokensForTokens(
-        parsedAmountA,
-        amountBMin,
-        path,
-        account,
-        deadlineTimestamp
-      );
+
+    try {
+      if (isETH(symbolA)) {
+        const amountAInWei = parseUnits(amountA, 'ether'); // ETH has 18 decimal places
+        const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
+
+        await swapExactETHForTokens(
+          amountBMin,
+          path,
+          account,
+          deadlineTimestamp,
+          { value: amountAInWei }
+        );
+      } else if (isETH(symbolB)) {
+        const parsedAmountA = parseUnits(amountA, decimalsA);
+        const amountETHMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
+
+
+        await swapExactTokensForETHSupportingFeeOnTransferTokens(
+          parsedAmountA,
+          amountETHMin,
+          path,
+          account,
+          deadlineTimestamp,
+          {gasLimit: 300000}
+        );
+      } else {
+        const parsedAmountA = parseUnits(amountA, decimalsA);
+        const amountBMin = calculateMinAmount(amountB, decimalsB, slippageTolerance);
+
+        await swapExactTokensForTokens(
+          parsedAmountA,
+          amountBMin,
+          path,
+          account,
+          deadlineTimestamp
+        );
+      }
+    } catch (error) {
+      console.log(tokenA, tokenB, amountA, amountB, decimalsA, decimalsB);
+      console.error("Swap failed:", error);
     }
   };
-  
+
+
   // Helper function to calculate minimum amount based on slippage
   function calculateMinAmount(amount, decimals, slippageTolerance) {
     const amountBN = parseUnits(amount, decimals);
     const slippageBN = BigNumber.from(Math.round(slippageTolerance * 10000));
     return amountBN.sub(amountBN.mul(slippageBN).div(10000));
   }
-  
+
 
   const handleTokenSelect = (token) => {
     // handle the token selection

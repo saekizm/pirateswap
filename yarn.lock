@@ -2835,6 +2835,13 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@pinata/ipfs-gateway-tools@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@pinata/ipfs-gateway-tools/-/ipfs-gateway-tools-1.3.0.tgz#96afd0218df30ca1b8859a109421649a11b17cca"
+  integrity sha512-qGsM8GIWVx8fyUXGNCQJciHEeDPZuZJARrFeuQacWjuyEh8M+T+rDUQkQVZ4u6pmp+bn0yOVWprr4K1212TYYA==
+  dependencies:
+    is-ipfs "^5.0.0"
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
@@ -8367,6 +8374,19 @@ is-ip@^3.1.0:
   dependencies:
     ip-regex "^4.0.0"
 
+is-ipfs@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/is-ipfs/-/is-ipfs-5.0.0.tgz#7f884d14155dd85beb6e6e1f8a8b1b334eb95896"
+  integrity sha512-mDH7JWGLMAtDAtPtgzdAxk1YZzk88pLmhqo2f0EfgHrIOZb4xfkczBCjk4N+ibnX+QYTxHol9i3tBTOj+g+OUQ==
+  dependencies:
+    cids "^1.1.6"
+    iso-url "^1.1.3"
+    mafmt "^9.0.0"
+    multiaddr "^9.0.1"
+    multibase "^4.0.2"
+    multihashes "^4.0.2"
+    uint8arrays "^2.1.3"
+
 is-map@^2.0.1, is-map@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/is-map/-/is-map-2.0.2.tgz#00922db8c9bf73e81b7a335827bc2a43f2b91127"
@@ -8565,7 +8585,7 @@ iso-random-stream@^2.0.0:
     events "^3.3.0"
     readable-stream "^3.4.0"
 
-iso-url@^1.1.5:
+iso-url@^1.1.3, iso-url@^1.1.5:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/iso-url/-/iso-url-1.2.1.tgz#db96a49d8d9a64a1c889fc07cc525d093afb1811"
   integrity sha512-9JPDgCN4B7QPkLtYAAOrEuAWvP9rWvR5offAr0/SeF046wIkglqH3VXgYYP6NcsKslH80UIVgmPqNe3j7tG2ng==
@@ -9766,6 +9786,13 @@ lz-string@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/lz-string/-/lz-string-1.5.0.tgz#c1ab50f77887b712621201ba9fd4e3a6ed099941"
   integrity sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==
+
+mafmt@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/mafmt/-/mafmt-9.0.0.tgz#6174f654ce25f45715cf7480ed3331c4c32924cc"
+  integrity sha512-BwKL6FJxc6R85K6gFE/pX7MVyCp0NkM2DJHg0RatxVgDlK4g9kqtfXQUt2iReSmTcgZss/Q/Bdfa2KTg4KyC+g==
+  dependencies:
+    multiaddr "^9.0.1"
 
 magic-string@^0.25.0, magic-string@^0.25.7:
   version "0.25.9"

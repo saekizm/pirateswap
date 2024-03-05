@@ -44,9 +44,11 @@ const TokenInput = ({
       const amounts = await getAmount(value, field);
       if (isUserInput) { // Check if the change was directly by the user
         if (field === 'A') {
+          setAmountA(value);
           setAmountB(amounts.amountB);
         } else {
           setAmountA(amounts.amountA);
+          setAmountB(value);
         }
         setIsUserInput(false); // Reset the flag after programmatic update
       }
