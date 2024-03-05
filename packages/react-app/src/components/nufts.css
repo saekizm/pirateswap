@@ -46,7 +46,7 @@
 
 .nufts_section .detail-box a {
   display: inline-block;
-  padding: 10px 45px;
+  padding: 10px 0px;
   background-color: #cc9f0d;
   color: #350641;
   border-radius: 0;
@@ -54,6 +54,8 @@
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
   text-wrap: nowrap;
+  text-align: center;
+  width: 100%;
 }
 
 .nufts_section .detail-box a:hover {
