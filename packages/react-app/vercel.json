@@ -1,0 +1,23 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "font-src 'self' data: https://fonts.gstatic.com; connect-src * 'self' https://rpc.spapcepirates.finance https://evm-cronos.crypto.org prefetch-src * 'self' https://rpc.spapcepirates.finance https://evm-cronos.crypto.org *.mypinata.com https://sphere.mypinata.com *.sentry.io; frame-src crypto.com"
+        },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+        }
+      ]
+    }
+  ]
+}
