@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
-import useCountdown from './useCountdown';
+import useCountdown from '../hooks/useCountdown';
 
 const Sdabs = () => {
     const [nft_days, nft_hours, nft_minutes, nft_seconds] = useCountdown('2024-02-28T20:00:00Z');
