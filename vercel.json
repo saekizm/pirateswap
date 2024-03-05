@@ -6,7 +6,7 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         {
           "key": "Content-Security-Policy",
-          "value": "font-src 'self' data: https://fonts.gstatic.com; connect-src * https://rpc.spapcepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud sentry.io; prefetch-src * https://rpc.spapcepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.com sentry.io; frame-src * sentry.io crypto.com"
+          "value": "font-src 'self' data: https://fonts.gstatic.com; connect-src * https://rpc.spapcepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud sentry.io; prefetch-src * https://rpc.spapcepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud sentry.io; frame-src * sentry.io crypto.com"
         },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         {
