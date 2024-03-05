@@ -1,0 +1,100 @@
+/* nufts.css */
+/* NftGallery.css */
+
+.banner {
+  background-color: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+}
+
+.nufts_section .nft-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.nufts_section .nft-gallery img {
+  width: 100%;
+  height: auto;
+}
+
+.nufts_section .nft-item {
+  border: 1px solid #ccc;
+  padding: 4px;
+}
+
+.nufts_section .nft-item h2 {
+  margin-top: 0;
+}
+
+.nufts_section .nft-item p {
+  margin-bottom: 0;
+}
+
+.nufts_section .img-box {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.nufts_section .detail-box a {
+  display: inline-block;
+  padding: 10px 45px;
+  background-color: #cc9f0d;
+  color: #350641;
+  border-radius: 0;
+  border: 1px solid #1d1c1c;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+  text-wrap: nowrap;
+}
+
+.nufts_section .detail-box a:hover {
+  background-color: transparent;
+  color: #e0ba0f;
+  text-wrap: nowrap;
+}
+
+.nufts_section .nft-item img {
+  width: 100%;
+  height: auto;
+}
+
+.nufts_section .img-box img {
+  width: 100%;
+  height: auto;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  background-color: #a5a8ac33;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background-color: #262529;
+}
+
+@media (max-width: 768px) {
+  .nft-gallery {
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(150px, 1fr)
+    ); /* Adjust minmax values for mobile view */
+  }
+}

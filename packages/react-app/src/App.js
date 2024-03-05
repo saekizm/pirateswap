@@ -7,23 +7,24 @@ import { Container } from "./components";
 import LandingPage from "./components/LandingPage";
 import Sdabs from "./components/sdabs";
 import Footer from "./components/Footer";
-import Farms from "./components/Farms"
-import Pools from "./components/Pools"
+import Farms from "./components/Farms";
+import Pools from "./components/Pools";
+import { NftHoldings } from "./components/nufts";
 import { WhitelistPresale } from "./components/WhitelistPresale";
 
 function App() {
-  
   return (
     <Router>
       <Container>
         <Navbar />
         <Routes>
-          <Route path="/" element={<LandingPage/>} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/swap" element={<Swap />} />
           <Route path="/liquidity" element={<Liquidity />} />
           <Route path="/sdabs" element={<WhitelistPresale />} />
           <Route path="/farms" element={<Farms />} />
           <Route path="/pools" element={<Pools />} />
+          <Route path="/nufts" element={<NftHoldings />} />
         </Routes>
         <Footer />
       </Container>

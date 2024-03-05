@@ -6,7 +6,7 @@ import {
   HttpLink,
   InMemoryCache,
 } from "@apollo/client";
-import { Cronos, CronosTestnet, DAppProvider } from "@usedapp/core";
+import { Cronos, DAppProvider } from "@usedapp/core";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -25,6 +25,7 @@ Sentry.init({
   tracePropagationTargets: [
     "localhost",
     /^https:\/\/spacepirates\.finance/,
+    /^https:\/\/rpc.spacepirates\.finance/,
     /^https:\/\/rpc\.spacepirates\.finance\/graphbase/,
   ],
 });

@@ -29,6 +29,7 @@
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.4",
     "@mui/styles": "^5.14.15",
+    "@pinata/ipfs-gateway-tools": "^1.3.0",
     "@sentry/browser": "^7.77.0",
     "@sentry/react": "^7.77.0",
     "@testing-library/dom": "^8.11.3",
