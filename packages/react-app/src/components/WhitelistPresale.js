@@ -3,7 +3,7 @@ import { parseUnits, formatUnits, hexlify } from 'ethers/lib/utils';
 import { useEthers } from '@usedapp/core';
 import { usePresaleContract } from '../hooks/usePresaleContract';
 import { Button, TextField, Box, Container, Typography, LinearProgress, Paper } from '@mui/material';
-import useCountdown from './useCountdown';
+import useCountdown from '../hooks/useCountdown';
 
 
 export const WhitelistPresale = () => {

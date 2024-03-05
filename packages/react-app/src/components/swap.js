@@ -8,7 +8,7 @@ import { MAINNET_ID, addresses, abis } from "./contracts";
 import TokenInput from "./TokenInput"
 import { constants, BigNumber } from 'ethers';
 import TokenDialog from './TokenDialog';
-import useBalance from './useBalance';
+import useBalance from '../hooks/useBalance';
 import { SettingModal } from './SettingModal';
 
 const Swap = () => {
