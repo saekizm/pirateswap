@@ -6,7 +6,7 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         {
           "key": "Content-Security-Policy",
-          "value": "img-src * 'self' data: https://sphere.mypinata.cloud https://gateway.pinata.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src * 'self' https://rpc.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; prefetch-src * 'self' https://rpc.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; frame-src * https://*.ingest.sentry.io crypto.com; object-src 'none'; script-src 'strict-dynamic' 'nonce-rAnd0m123' 'unsafe-inline' http: https:;"
+          "value": "img-src * 'self' data: https://sphere.mypinata.cloud https://gateway.pinata.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src * 'self' https://rpc.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; prefetch-src * 'self' https://rpc.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; frame-src * https://*.ingest.sentry.io crypto.com; object-src 'none'; script-src 'strict-dynamic' 'nonce-rAnd0m123' 'unsafe-inline' http: https:; report-uri https://spacepiratesfinance.report-uri.com/r/d/csp/enforce"
         },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         {
