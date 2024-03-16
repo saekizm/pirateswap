@@ -25,13 +25,13 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-brands-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@graphprotocol/graph-ts": "^0.31.0",
+    "@graphprotocol/graph-ts": "^0.33.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.4",
     "@mui/styles": "^5.14.15",
     "@pinata/ipfs-gateway-tools": "^1.3.0",
-    "@sentry/browser": "^7.105.0",
-    "@sentry/react": "^7.105.0",
+    "@sentry/browser": "^7.106.0",
+    "@sentry/react": "^7.106.0",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.4",
@@ -43,14 +43,14 @@
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "@usedapp/core": "^1.1.5",
     "ethers": "^5.7.0",
-    "graphql": "^16.3.0",
-    "ipfs-deploy": "^11.2.0",
+    "graphql": "^16.8.1",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.3.11",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
+    "save": "^2.9.0",
     "styled-components": "^6.0.7"
   },
   "eslintConfig": {
@@ -76,7 +76,8 @@
     "test": "react-scripts test"
   },
   "devDependencies": {
-    "@sentry/browser": "^7.77.0",
-    "@sentry/tracing": "^7.77.0"
+    "@sentry/browser": "^7.106.0",
+    "@sentry/tracing": "^7.106.0",
+    "node-fetch": "^3.3.2"
   }
 }

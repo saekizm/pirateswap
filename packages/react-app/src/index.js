@@ -26,7 +26,9 @@ Sentry.init({
     "localhost",
     /^https:\/\/spacepirates\.finance/,
     /^https:\/\/rpc.spacepirates\.finance/,
+    /^https:\/\/rpcx.spacepirates\.finance/,
     /^https:\/\/rpc\.spacepirates\.finance\/graphbase/,
+    /^https:\/\/rpcg\.spacepirates\.finance\/graphbase/,
   ],
 });
 
@@ -42,7 +44,7 @@ const config = {
   },
 };
 const link = new HttpLink({
-  uri: "https://rpc.spacepirates.finance/graphbase/subgraphs/name/pswap/factorypair",
+  uri: "https://rpcg.spacepirates.finance/graphbase/subgraphs/name/pswap/factorypair",
 });
 // This is the official Uniswap v2 subgraph. You can replace it with your own, if you need to.
 // See all subgraphs: https://thegraph.com/explorer/
