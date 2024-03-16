@@ -6,7 +6,7 @@
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         {
           "key": "Content-Security-Policy",
-          "value": "img-src * 'self' data: https://sphere.mypinata.cloud https://gateway.pinata.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src * 'self' https://rpcg.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; prefetch-src * 'self' https://rpcg.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; frame-src * https://*.ingest.sentry.io crypto.com; object-src 'none';"
+          "value": "img-src * 'self' data: https://sphere.mypinata.cloud https://gateway.pinata.cloud; font-src 'self' data: https://fonts.gstatic.com; connect-src * 'self' https://rpcg.spacepirates.finance https://evm-cronos.crypto.org https://gateway.pinata.cloud https://sphere.mypinata.cloud https://*.ingest.sentry.io; frame-src * https://*.ingest.sentry.io crypto.com; object-src 'none';"
         },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         {
@@ -15,7 +15,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Sentry-Token, Baggage"
+          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Sentry-Token"
         }
       ]
     }
