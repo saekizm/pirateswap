@@ -24,11 +24,12 @@ Sentry.init({
   // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
   tracePropagationTargets: [
     "localhost",
-    /^https:\/\/spacepirates\.finance/,
-    /^https:\/\/rpc.spacepirates\.finance/,
-    /^https:\/\/rpcx.spacepirates\.finance/,
-    /^https:\/\/rpc\.spacepirates\.finance\/graphbase/,
-    /^https:\/\/rpcg\.spacepirates\.finance\/graphbase/,
+    /^https:\/\/spacepirates.finance/,
+    /^https:\/\/rpc.spacepirates.finance/,
+    /^https:\/\/rpcx.spacepirates.finance/,
+    /^https:\/\/rpcg.spacepirates.finance/,
+    /^https:\/\/rpc.spacepirates.finance\/graphbase/,
+    /^https:\/\/rpcg.spacepirates.finance\/graphbase/,
   ],
 });
 
@@ -44,7 +45,7 @@ const config = {
   },
 };
 const link = new HttpLink({
-  uri: "https://rpcg.spacepirates.finance/graphbase/subgraphs/name/pswap/factorypair",
+  uri: "https://rpcg.spacepirates.finance/subgraphs/name/pswap/factorypair",
 });
 // This is the official Uniswap v2 subgraph. You can replace it with your own, if you need to.
 // See all subgraphs: https://thegraph.com/explorer/
