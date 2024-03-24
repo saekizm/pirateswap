@@ -11,6 +11,7 @@ import Farms from "./components/Farms";
 import Pools from "./components/Pools";
 import { NftHoldings } from "./components/nufts";
 import { WhitelistPresale } from "./components/WhitelistPresale";
+import Chart from "./components/Chart/Chart";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/farms" element={<Farms />} />
           <Route path="/pools" element={<Pools />} />
           <Route path="/nufts" element={<NftHoldings />} />
+          <Route path="/chart" element={<Chart />} />
         </Routes>
         <Footer />
       </Container>
